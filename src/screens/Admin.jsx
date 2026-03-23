@@ -384,31 +384,174 @@ function EquipeTab({ funcionarios, kiosque, showToast }) {
 
 // ── QR Codes ──────────────────────────────────────────
 function QRCodesTab({ kiosque, slug }) {
-  const parasols = useQuery(api.kiosques.getMenuComplet, { slug })
+  const parasols = useQuery(api.kiosques.listarParasols)
+  const adicionar = useMutation(api.kiosques.adicionarParasol)
+  const remover = useMutation(api.kiosques.removerParasol)
+  const toggle = useMutation(api.kiosques.toggleParasol)
+  const { showToast } = useToast()
+  const [novoNumero, setNovoNumero] = useState('')
+  const [showAdd, setShowAdd] = useState(false)
+  const [selectedQR, setSelectedQR] = useState(null)
+
+  const baseUrl = 'https://pay.quiosquepraia.com'
+
+  function qrUrl(numero) {
+    const url = `${baseUrl}/${slug}/${numero.toLowerCase()}`
+    return `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=${encodeURIComponent(url)}`
+  }
+
+  async function handleAdd() {
+    if (!novoNumero.trim()) { showToast('⚠️ Informe o número'); return }
+    try {
+      await adicionar({ numero: novoNumero.trim().toUpperCase() })
+      showToast('✅ Guarda-sol adicionado!')
+      setNovoNumero(''); setShowAdd(false)
+    } catch (e) { showToast('❌ ' + e.message) }
+  }
+
+  async function handleDownload(numero) {
+    const url = qrUrl(numero)
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width; canvas.height = img.height + 60
+      const ctx = canvas.getContext('2d')
+      ctx.fillStyle = 'white'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+      ctx.drawImage(img, 0, 0)
+      ctx.fillStyle = '#0D3B66'
+      ctx.font = 'bold 22px Arial'
+      ctx.textAlign = 'center'
+      ctx.fillText(`🏖️ ${numero}`, canvas.width / 2, img.height + 38)
+      const a = document.createElement('a')
+      a.href = canvas.toDataURL('image/png')
+      a.download = `qr-${slug}-${numero}.png`
+      a.click()
+    }
+    img.src = url
+  }
+
+  const ativos = parasols?.filter(p => p.actif) ?? []
+  const inativos = parasols?.filter(p => !p.actif) ?? []
+
   return (
     <>
+      {/* URL do quiosque */}
       <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', marginBottom: 16 }}>
-        <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: 'var(--ocean)', marginBottom: 4 }}>URL do seu Quiosque</p>
-        <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 12, marginTop: 12, wordBreak: 'break-all', fontSize: 13, color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-          praiapp.com.br/<strong style={{ color: 'var(--ocean)' }}>{slug}</strong>
+        <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: 'var(--ocean)', marginBottom: 8 }}>
+          🔗 URL do seu Quiosque
+        </p>
+        <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 12, wordBreak: 'break-all', fontSize: 13, color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
+          pay.quiosquepraia.com/<strong style={{ color: 'var(--ocean)' }}>{slug}</strong>/<strong style={{ color: 'var(--lime)' }}>GS-01</strong>
         </div>
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 8 }}>URL única e otimizada para SEO ✅</p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6 }}>Cada guarda-sol tem sua própria URL e QR Code único ✅</p>
       </div>
 
-      <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)' }}>
-        <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: 'var(--ocean)', marginBottom: 16 }}>Guarda-Sóis</p>
-        {parasols?.parasols?.map(p => (
-          <div key={p._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #F1F5F9' }}>
-            <div>
-              <span style={{ fontFamily: "'Baloo 2',cursive", fontWeight: 700, color: 'var(--ocean)', fontSize: 15 }}>🏖️ {p.numero}</span>
-              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>praiapp.com.br/{slug}/{p.numero.toLowerCase()}</div>
-            </div>
-            <button style={{ background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
-              ⬇ QR
+      {/* Lista parasols */}
+      <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: 'var(--ocean)' }}>
+            🏖️ Guarda-Sóis ({ativos.length} ativos)
+          </p>
+          <button onClick={() => setShowAdd(!showAdd)} style={{ background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 10, padding: '8px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+            + Adicionar
+          </button>
+        </div>
+
+        {/* Form adicionar */}
+        {showAdd && (
+          <div style={{ background: 'var(--surface)', borderRadius: 12, padding: 14, marginBottom: 16, display: 'flex', gap: 10 }}>
+            <input
+              className="form-input"
+              value={novoNumero}
+              onChange={e => setNovoNumero(e.target.value.toUpperCase())}
+              placeholder="Ex: GS-13"
+              style={{ flex: 1, margin: 0 }}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            />
+            <button onClick={handleAdd} style={{ background: '#06D6A0', color: 'white', border: 'none', borderRadius: 10, padding: '0 16px', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+              ✅ Salvar
+            </button>
+            <button onClick={() => setShowAdd(false)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 10, padding: '0 12px', fontSize: 13, cursor: 'pointer', color: 'var(--text-secondary)', fontFamily: 'Inter,sans-serif' }}>
+              ✕
             </button>
           </div>
+        )}
+
+        {!parasols && <div style={{ color: 'var(--text-muted)', fontSize: 14, textAlign: 'center', padding: 20 }}>Carregando...</div>}
+
+        {ativos.map(p => (
+          <div key={p._id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: '1px solid #F1F5F9' }}>
+            {/* Mini QR preview */}
+            <img
+              src={qrUrl(p.numero)}
+              alt={`QR ${p.numero}`}
+              style={{ width: 52, height: 52, borderRadius: 8, border: '1px solid var(--border)' }}
+            />
+            <div style={{ flex: 1 }}>
+              <span style={{ fontFamily: "'Baloo 2',cursive", fontWeight: 700, color: 'var(--ocean)', fontSize: 15 }}>🏖️ {p.numero}</span>
+              <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 1 }}>
+                pay.quiosquepraia.com/{slug}/{p.numero.toLowerCase()}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              <button onClick={() => setSelectedQR(p)} style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '6px 10px', fontSize: 12, cursor: 'pointer', color: 'var(--ocean)', fontFamily: 'Inter,sans-serif', fontWeight: 600 }}>
+                🔍 Ver
+              </button>
+              <button onClick={() => handleDownload(p.numero)} style={{ background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+                ⬇ QR
+              </button>
+              <button onClick={() => toggle({ parasolId: p._id, actif: false }).then(() => showToast('⚠️ Desativado'))} style={{ background: 'var(--surface)', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>
+                🚫
+              </button>
+            </div>
+          </div>
         ))}
+
+        {inativos.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 8 }}>Inativos ({inativos.length})</p>
+            {inativos.map(p => (
+              <div key={p._id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 0', opacity: 0.5 }}>
+                <span style={{ fontSize: 14, color: 'var(--text-secondary)' }}>🏖️ {p.numero}</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button onClick={() => toggle({ parasolId: p._id, actif: true }).then(() => showToast('✅ Reativado'))} style={{ background: '#D1FAE5', border: 'none', borderRadius: 8, padding: '4px 10px', fontSize: 12, cursor: 'pointer', color: '#065F46', fontFamily: 'Inter,sans-serif' }}>
+                    ✅ Reativar
+                  </button>
+                  <button onClick={() => remover({ parasolId: p._id }).then(() => showToast('🗑️ Removido'))} style={{ background: 'var(--surface)', border: 'none', borderRadius: 8, width: 28, height: 28, cursor: 'pointer', fontSize: 14 }}>
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {/* Modal QR grande */}
+      {selectedQR && (
+        <div className="modal-overlay open" onClick={() => setSelectedQR(null)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()} style={{ textAlign: 'center' }}>
+            <div className="modal-handle" />
+            <div className="modal-title">🏖️ {selectedQR.numero}</div>
+            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 16 }}>
+              pay.quiosquepraia.com/{slug}/{selectedQR.numero.toLowerCase()}
+            </p>
+            <img
+              src={qrUrl(selectedQR.numero)}
+              alt={`QR ${selectedQR.numero}`}
+              style={{ width: 240, height: 240, borderRadius: 16, border: '2px solid var(--border)', marginBottom: 20 }}
+            />
+            <button className="btn-primary" onClick={() => handleDownload(selectedQR.numero)} style={{ marginBottom: 10 }}>
+              ⬇ Baixar QR Code PNG
+            </button>
+            <button onClick={() => setSelectedQR(null)} style={{ width: '100%', background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer', padding: 8, fontFamily: 'Inter,sans-serif' }}>
+              Fechar
+            </button>
+          </div>
+        </div>
+      )}
     </>
   )
 }

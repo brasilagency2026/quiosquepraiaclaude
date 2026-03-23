@@ -23,7 +23,6 @@ export const criar = mutation({
   handler: async (ctx, args) => {
     const identity = await assertSuperAdmin(ctx);
 
-    // Verificar slug único
     const existing = await ctx.db
       .query("kiosques")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
@@ -59,6 +58,14 @@ export const criar = mutation({
         actif: true,
       });
     }
+
+    // Criar gestor na tabela usuarios
+    await ctx.db.insert("usuarios", {
+      kiosqueId,
+      nom: args.nomGestor || args.emailGestor,
+      role: "gestor",
+      actif: true,
+    });
 
     return kiosqueId;
   },
@@ -127,7 +134,51 @@ export const getMenuComplet = query({
   },
 });
 
-// ── Gestor ───────────────────────────────────────────
+// ── Gestor — Parasols ────────────────────────────────
+
+export const listarParasols = query({
+  handler: async (ctx) => {
+    const { kiosque } = await getKiosqueDoGestor(ctx);
+    return ctx.db
+      .query("parasols")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .collect();
+  },
+});
+
+export const adicionarParasol = mutation({
+  args: { numero: v.string() },
+  handler: async (ctx, { numero }) => {
+    const { kiosque } = await getKiosqueDoGestor(ctx);
+    const existing = await ctx.db
+      .query("parasols")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .filter((q) => q.eq(q.field("numero"), numero))
+      .first();
+    if (existing) throw new Error("Guarda-sol já existe");
+    return ctx.db.insert("parasols", {
+      kiosqueId: kiosque._id,
+      numero,
+      actif: true,
+    });
+  },
+});
+
+export const removerParasol = mutation({
+  args: { parasolId: v.id("parasols") },
+  handler: async (ctx, { parasolId }) => {
+    await getKiosqueDoGestor(ctx);
+    await ctx.db.delete(parasolId);
+  },
+});
+
+export const toggleParasol = mutation({
+  args: { parasolId: v.id("parasols"), actif: v.boolean() },
+  handler: async (ctx, { parasolId, actif }) => {
+    await getKiosqueDoGestor(ctx);
+    await ctx.db.patch(parasolId, { actif });
+  },
+});
 
 export const atualizarMercadoPago = mutation({
   args: { token: v.string() },
