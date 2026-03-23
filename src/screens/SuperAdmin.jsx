@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'convex/react'
-import { useUser, SignOutButton } from '@clerk/clerk-react'
+import { useUser, SignOutButton, SignInButton } from '@clerk/clerk-react'
 import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
 
@@ -12,12 +12,26 @@ export default function SuperAdmin() {
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ slug: '', nom: '', ville: '', etat: '', emailGestor: '', nomGestor: '' })
 
-  const kiosques = useQuery(api.kiosques.listarTodos)
+  const kiosques = useQuery(api.kiosques.listarTodos, user ? undefined : 'skip')
   const criar = useMutation(api.kiosques.criar)
   const suspender = useMutation(api.kiosques.suspender)
   const reativar = useMutation(api.kiosques.reativar)
 
   if (!isLoaded) return <Loading />
+
+  if (!user) return (
+    <div style={{ minHeight: '100vh', background: '#0D2137', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 24 }}>
+      <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#F5E6C8', textAlign: 'center' }}>
+        Praia<span style={{ color: '#00B4D8' }}>App</span>
+        <div style={{ fontSize: 14, background: '#FF6B6B', color: 'white', padding: '4px 14px', borderRadius: 8, marginTop: 8, fontFamily: 'Inter,sans-serif', fontWeight: 700, display: 'inline-block' }}>SUPER ADMIN</div>
+      </div>
+      <SignInButton mode="modal">
+        <button style={{ background: '#00B4D8', color: '#0D2137', border: 'none', borderRadius: 14, padding: '16px 36px', fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: "'Baloo 2',cursive", boxShadow: '0 4px 20px rgba(0,180,216,0.4)' }}>
+          🔐 Entrar
+        </button>
+      </SignInButton>
+    </div>
+  )
 
   function autoSlug() {
     const s = `${form.nom}-${form.ville}-${form.etat}`
@@ -189,7 +203,7 @@ export default function SuperAdmin() {
                 placeholder="brisa-do-mar-guaruja-sp"
                 style={{ fontFamily: 'monospace', fontSize: 13 }} />
               <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                URL: praiapp.com.br/{form.slug || '...'}
+                URL: pay.quiosquepraia.com/{form.slug || '...'}
               </p>
             </div>
 
