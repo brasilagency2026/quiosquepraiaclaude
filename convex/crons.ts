@@ -3,10 +3,9 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
-// Nettoyer sessions PIN expirées toutes les heures
-crons.hourly(
+crons.interval(
   "cleanup expired PIN sessions",
-  { minuteOfHour: 30 },
+  { hours: 1 },
   internal.pinAuth.nettoyerSessions
 );
 
