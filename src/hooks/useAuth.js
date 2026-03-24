@@ -5,7 +5,7 @@ import { api } from '../../convex/_generated/api'
 // Auth par PIN pour les funcionários
 export function useAuthPIN() {
   const token = typeof window !== 'undefined'
-    ? localStorage.getItem('praiapp_pin_token')
+    ? localStorage.getItem('quiosquepraia_pin_token')
     : null
   const session = useQuery(
     api.pinAuth.verificarSession,
@@ -16,7 +16,7 @@ export function useAuthPIN() {
     isLoading: session === undefined,
     isAuth: session !== null && session !== undefined,
     logout: () => {
-      localStorage.removeItem('praiapp_pin_token')
+      localStorage.removeItem('quiosquepraia_pin_token')
       window.location.href = '/scan'
     }
   }

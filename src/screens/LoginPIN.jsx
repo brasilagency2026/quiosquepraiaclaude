@@ -26,8 +26,8 @@ export default function LoginPIN() {
           pin: newPin,
           dispositivo: navigator.userAgent.substring(0, 100),
         })
-        localStorage.setItem('praiapp_pin_token', result.token)
-        localStorage.setItem('praiapp_role', result.role)
+        localStorage.setItem('quiosquepraia_pin_token', result.token)
+        localStorage.setItem('quiosquepraia_role', result.role)
         navigate(ROLE_ROUTES[result.role] + slug)
       } catch (e) {
         setErreur('PIN incorreto')
@@ -49,7 +49,7 @@ export default function LoginPIN() {
       padding: '40px 24px'
     }}>
       <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#F5E6C8', marginBottom: 4 }}>
-        Praia<span style={{ color: '#00B4D8' }}>App</span>
+        Quiosque <span style={{ color: '#00B4D8' }}>Praia</span>
       </div>
       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>Acesso da equipe</div>
       <div style={{ fontSize: 14, color: '#48CAE4', marginBottom: 40, background: 'rgba(0,180,216,0.1)', padding: '6px 16px', borderRadius: 20 }}>

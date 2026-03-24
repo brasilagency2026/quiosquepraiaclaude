@@ -28,10 +28,25 @@ export const criarFuncionario = mutation({
   },
   handler: async (ctx, args) => {
     const { kiosque } = await getKiosqueDoGestor(ctx);
+
     if (args.pin.length !== 4 || !/^\d{4}$/.test(args.pin)) {
       throw new Error("PIN deve ter exatamente 4 dígitos");
     }
+
     const pinHash = hashPinSimple(args.pin);
+
+    // Verificar PIN duplicado no mesmo quiosque
+    const todos = await ctx.db
+      .query("usuarios")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .filter((q) => q.eq(q.field("actif"), true))
+      .collect();
+
+    const duplicado = todos.find(u => u.pinHash === pinHash);
+    if (duplicado) {
+      throw new Error(`PIN já está em uso por ${duplicado.nom}. Escolha um PIN diferente.`);
+    }
+
     return ctx.db.insert("usuarios", {
       kiosqueId: kiosque._id,
       nom: args.nom,
@@ -55,7 +70,22 @@ export const alterarPIN = mutation({
       throw new Error("Funcionário não encontrado");
     }
     if (!/^\d{4}$/.test(novoPin)) throw new Error("PIN inválido");
-    await ctx.db.patch(usuarioId, { pinHash: hashPinSimple(novoPin) });
+
+    const novoHash = hashPinSimple(novoPin);
+
+    // Verificar duplicado (excluindo o próprio usuário)
+    const todos = await ctx.db
+      .query("usuarios")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .filter((q) => q.eq(q.field("actif"), true))
+      .collect();
+
+    const duplicado = todos.find(u => u.pinHash === novoHash && u._id !== usuarioId);
+    if (duplicado) {
+      throw new Error(`PIN já está em uso por ${duplicado.nom}. Escolha um PIN diferente.`);
+    }
+
+    await ctx.db.patch(usuarioId, { pinHash: novoHash });
   },
 });
 

@@ -81,7 +81,7 @@ export default function Pagamento({ total, cart, onBack, onConfirm }) {
 function PixSection({ total }) {
   const { showToast } = useToast()
   const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
-  const pixKey = '00020126580014br.gov.bcb.pix0136praiapp@pix.com.br'
+  const pixKey = '00020126580014br.gov.bcb.pix0136contato@quiosquepraia.com'
 
   // Generate simple QR pattern
   const cells = Array.from({ length: 81 }, (_, i) => {
@@ -96,7 +96,7 @@ function PixSection({ total }) {
         {cells.map((f, i) => <div key={i} style={{ borderRadius: 1, background: f ? 'var(--ocean)' : 'transparent' }} />)}
       </div>
       <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 22, fontWeight: 800, color: 'var(--ocean)' }}>{fmt(total)}</div>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>PraiaApp · CNPJ 00.000.000/0001-00</p>
+      <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Quiosque Praia · CNPJ 00.000.000/0001-00</p>
       <button onClick={() => { navigator.clipboard?.writeText(pixKey); showToast('📋 Chave PIX copiada!') }}
         style={{ background: 'var(--surface)', border: '1.5px solid var(--border)', borderRadius: 10, padding: '10px 16px', fontSize: 13, color: 'var(--ocean)', cursor: 'pointer', width: '100%', marginTop: 12, fontWeight: 600, fontFamily: 'Inter,sans-serif' }}>
         📋 Copiar Chave PIX

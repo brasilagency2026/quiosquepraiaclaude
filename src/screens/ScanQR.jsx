@@ -84,7 +84,7 @@ export default function ScanQR() {
 
       {/* Logo */}
       <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#F5E6C8', marginBottom: 4, position: 'relative', zIndex: 1 }}>
-        Praia<span style={{ color: '#00B4D8' }}>App</span>
+        Quiosque <span style={{ color: '#00B4D8' }}>Praia</span>
       </div>
       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.38)', marginBottom: 36, letterSpacing: '0.04em', position: 'relative', zIndex: 1 }}>
         Sistema de pedidos para quiosques de praia

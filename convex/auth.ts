@@ -1,16 +1,14 @@
 import { QueryCtx, MutationCtx } from "./_generated/server";
 
-// IDs Clerk des super admins — à remplacer par vos vrais IDs
 export const SUPER_ADMIN_IDS: string[] = [
-  // Ajoutez votre Clerk User ID ici après avoir créé votre compte
-  // Ex: "user_2abc123xyz"
+  "user_3BLniordP8ig9HQg4fuyate3g8N",
 ];
 
 export async function assertSuperAdmin(ctx: QueryCtx | MutationCtx) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) throw new Error("Não autenticado");
-  // En attendant la config, accepter tout utilisateur Clerk connecté comme superadmin
-  // Remplacez par: if (!SUPER_ADMIN_IDS.includes(identity.subject))
+  if (!SUPER_ADMIN_IDS.includes(identity.subject))
+    throw new Error("Acesso negado");
   return identity;
 }
 
@@ -35,9 +33,7 @@ export async function getKiosqueDoGestor(ctx: QueryCtx | MutationCtx) {
   return { usuario, kiosque };
 }
 
-// Hash PIN simple (en production utilisez bcrypt via Convex Action)
 export function hashPinSimple(pin: string): string {
-  // XOR simple pour demo — remplacez par bcrypt en production
   let h = 0;
   for (let i = 0; i < pin.length; i++) {
     h = (Math.imul(31, h) + pin.charCodeAt(i)) | 0;

@@ -11,7 +11,7 @@ export default function LoginGestor() {
       padding: '40px 24px'
     }}>
       <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#F5E6C8', marginBottom: 4 }}>
-        Praia<span style={{ color: '#00B4D8' }}>App</span>
+        Quiosque <span style={{ color: '#00B4D8' }}>Praia</span>
       </div>
       <div style={{ fontSize: 14, color: '#48CAE4', marginBottom: 32, background: 'rgba(0,180,216,0.1)', padding: '6px 16px', borderRadius: 20 }}>
         Acesso do Gestor · {slug}
