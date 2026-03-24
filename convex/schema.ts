@@ -51,6 +51,7 @@ export default defineSchema({
     kiosqueId: v.id("kiosques"),
     numero: v.string(),
     actif: v.boolean(),
+    liberadoEm: v.optional(v.number()),
   }).index("by_kiosque", ["kiosqueId"]),
 
   pedidos: defineTable({

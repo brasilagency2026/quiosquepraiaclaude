@@ -388,6 +388,7 @@ function QRCodesTab({ kiosque, slug }) {
   const adicionar = useMutation(api.kiosques.adicionarParasol)
   const remover = useMutation(api.kiosques.removerParasol)
   const toggle = useMutation(api.kiosques.toggleParasol)
+  const liberar = useMutation(api.kiosques.liberarParasol)
   const { showToast } = useToast()
   const [novoNumero, setNovoNumero] = useState('')
   const [showAdd, setShowAdd] = useState(false)
@@ -546,6 +547,13 @@ function QRCodesTab({ kiosque, slug }) {
               </button>
               <button onClick={() => handleDownload(p.numero)} style={{ background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
                 ⬇ QR
+              </button>
+              <button onClick={() => {
+                if (window.confirm(`Liberar ${p.numero}? O histórico de pedidos não será mais visível para novos clientes.`)) {
+                  liberar({ parasolId: p._id }).then(() => showToast(`✅ ${p.numero} liberado para novo cliente!`))
+                }
+              }} style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: '#92400E', fontFamily: 'Inter,sans-serif' }}>
+                🔄
               </button>
               <button onClick={() => toggle({ parasolId: p._id, actif: false }).then(() => showToast('⚠️ Desativado'))} style={{ background: 'var(--surface)', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>
                 🚫

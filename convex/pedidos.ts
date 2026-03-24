@@ -191,13 +191,27 @@ export const getPedidosParasol = query({
   },
   handler: async (ctx, { kiosqueId, parasolNumero }) => {
     const hoje = new Date().setHours(0, 0, 0, 0);
+
+    // Verificar se o parasol foi liberado hoje
+    const parasol = await ctx.db
+      .query("parasols")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
+      .filter((q) => q.eq(q.field("numero"), parasolNumero))
+      .first();
+
+    // Data de corte: hora de liberação ou início do dia (o que for mais recente)
+    const corteLiberacao = parasol?.liberadoEm && parasol.liberadoEm >= hoje
+      ? parasol.liberadoEm
+      : hoje;
+
     const todos = await ctx.db
       .query("pedidos")
       .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
       .order("desc")
       .collect();
+
     return todos.filter(
-      (p) => p.parasolNumero === parasolNumero && p.criadoEm >= hoje
+      (p) => p.parasolNumero === parasolNumero && p.criadoEm >= corteLiberacao
     );
   },
 });
