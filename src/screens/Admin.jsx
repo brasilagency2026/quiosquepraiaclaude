@@ -437,10 +437,55 @@ function QRCodesTab({ kiosque, slug }) {
 
   return (
     <>
+      {/* QR Vitrine — cardápio sem pedidos */}
+      <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', marginBottom: 16 }}>
+        <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: 'var(--ocean)', marginBottom: 4 }}>
+          👁️ QR Cardápio — Só Consulta
+        </p>
+        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+          Clientes veem o cardápio mas não podem fazer pedidos. Ideal para afixar na entrada ou nas redes sociais.
+        </p>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <img
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=10&data=${encodeURIComponent(`${baseUrl}/menu/${slug}`)}`}
+            alt="QR Vitrine"
+            style={{ width: 90, height: 90, borderRadius: 10, border: '1px solid var(--border)', flexShrink: 0 }}
+          />
+          <div style={{ flex: 1 }}>
+            <div style={{ background: 'var(--surface)', borderRadius: 8, padding: '8px 10px', fontSize: 12, color: 'var(--text-secondary)', border: '1px solid var(--border)', wordBreak: 'break-all', marginBottom: 10 }}>
+              pay.quiosquepraia.com/menu/<strong style={{ color: 'var(--ocean)' }}>{slug}</strong>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => {
+                const url = `${baseUrl}/menu/${slug}`
+                const img = new Image(); img.crossOrigin = 'anonymous'
+                img.onload = () => {
+                  const canvas = document.createElement('canvas')
+                  canvas.width = img.width; canvas.height = img.height + 50
+                  const ctx = canvas.getContext('2d')
+                  ctx.fillStyle = 'white'; ctx.fillRect(0, 0, canvas.width, canvas.height)
+                  ctx.drawImage(img, 0, 0)
+                  ctx.fillStyle = '#0D3B66'; ctx.font = 'bold 18px Arial'; ctx.textAlign = 'center'
+                  ctx.fillText('Cardápio', canvas.width / 2, img.height + 32)
+                  const a = document.createElement('a'); a.href = canvas.toDataURL('image/png')
+                  a.download = `qr-cardapio-${slug}.png`; a.click()
+                }
+                img.src = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&margin=20&data=${encodeURIComponent(url)}`
+              }} style={{ flex: 1, background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+                ⬇ Baixar QR
+              </button>
+              <button onClick={() => window.open(`${baseUrl}/menu/${slug}`, '_blank')} style={{ flex: 1, background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 8, padding: '8px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', color: 'var(--ocean)', fontFamily: 'Inter,sans-serif' }}>
+                👁️ Ver Menu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* URL do quiosque */}
       <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', marginBottom: 16 }}>
         <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: 'var(--ocean)', marginBottom: 8 }}>
-          🔗 URL do seu Quiosque
+          🔗 URL dos Guarda-Sóis
         </p>
         <div style={{ background: 'var(--surface)', borderRadius: 10, padding: 12, wordBreak: 'break-all', fontSize: 13, color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
           pay.quiosquepraia.com/<strong style={{ color: 'var(--ocean)' }}>{slug}</strong>/<strong style={{ color: 'var(--lime)' }}>GS-01</strong>
