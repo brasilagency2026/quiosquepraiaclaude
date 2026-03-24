@@ -182,3 +182,22 @@ export const acompanharPedido = query({
     return ctx.db.get(pedidoId);
   },
 });
+
+// ── Pedidos do parasol (para o cliente acompanhar) ───
+export const getPedidosParasol = query({
+  args: {
+    kiosqueId: v.id("kiosques"),
+    parasolNumero: v.string(),
+  },
+  handler: async (ctx, { kiosqueId, parasolNumero }) => {
+    const hoje = new Date().setHours(0, 0, 0, 0);
+    const todos = await ctx.db
+      .query("pedidos")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
+      .order("desc")
+      .collect();
+    return todos.filter(
+      (p) => p.parasolNumero === parasolNumero && p.criadoEm >= hoje
+    );
+  },
+});

@@ -10,6 +10,10 @@ import Carrinho from './Carrinho'
 import Pagamento from './Pagamento'
 import Confirmado from './Confirmado'
 
+const STATUS_LABEL = { pago: 'Aguardando', cozinha: 'Em preparo 🍳', pronto: 'Pronto! 🎉', entregue: 'Entregue ✅', cancelado: 'Cancelado', parcial: 'Cancelado parcial' }
+const STATUS_COLOR = { pago: '#00B4D8', cozinha: '#F59E0B', pronto: '#06D6A0', entregue: '#8AAABB', cancelado: '#FF6B6B', parcial: '#F59E0B' }
+const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
+
 export default function Menu() {
   const { slug, parasol } = useParams()
   const navigate = useNavigate()
@@ -18,10 +22,15 @@ export default function Menu() {
   const { cart, addItem, changeQty, clearCart, total, count } = useCart()
   const [activecat, setActivecat] = useState('todos')
   const [modalItem, setModalItem] = useState(null)
-  const [screen, setScreen] = useState('menu') // menu | cart | payment | confirmed
+  const [screen, setScreen] = useState('menu') // menu | cart | payment | confirmed | meus-pedidos
   const [pedidoId, setPedidoId] = useState(null)
   const [pedidoNumero, setPedidoNumero] = useState(null)
   const criarPedido = useMutation(api.pedidos.criar)
+
+  const meusPedidos = useQuery(
+    api.pedidos.getPedidosParasol,
+    menuData?.kiosque ? { kiosqueId: menuData.kiosque._id, parasolNumero: parasol } : 'skip'
+  )
 
   if (!menuData) return <Loading />
   if (!menuData.kiosque) return <NotFound />
@@ -57,6 +66,15 @@ export default function Menu() {
       showToast('❌ Erro ao criar pedido: ' + e.message)
     }
   }
+
+  if (screen === 'meus-pedidos') return (
+    <MeusPedidos
+      pedidos={meusPedidos}
+      parasol={parasol}
+      onBack={() => setScreen('menu')}
+      onNovoPedido={() => setScreen('menu')}
+    />
+  )
 
   if (screen === 'cart') return (
     <Carrinho
@@ -105,6 +123,21 @@ export default function Menu() {
               cursor: 'pointer', fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D2137'
             }}>
               🛒 <span style={{ background: '#FF6B6B', color: 'white', borderRadius: 10, padding: '1px 7px', fontSize: 12, fontWeight: 700 }}>{count}</span>
+            </button>
+          )}
+          {count === 0 && meusPedidos && meusPedidos.length > 0 && (
+            <button onClick={() => setScreen('meus-pedidos')} style={{
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 14, padding: '8px 12px', cursor: 'pointer',
+              fontFamily: "'Baloo 2',cursive", fontSize: 13, fontWeight: 700, color: 'white',
+              display: 'flex', alignItems: 'center', gap: 6
+            }}>
+              📋 <span style={{ fontSize: 11 }}>Meus pedidos</span>
+              {meusPedidos.filter(p => ['pago','cozinha','pronto'].includes(p.statut)).length > 0 && (
+                <span style={{ background: '#06D6A0', color: '#0D2137', borderRadius: 10, padding: '1px 7px', fontSize: 11, fontWeight: 700 }}>
+                  {meusPedidos.filter(p => ['pago','cozinha','pronto'].includes(p.statut)).length}
+                </span>
+              )}
             </button>
           )}
         </div>
@@ -205,6 +238,133 @@ function MenuCard({ item, qty, onClick, onQuickAdd }) {
           <div style={{ background: '#FF6B6B', color: 'white', padding: '6px 16px', borderRadius: 20, fontFamily: "'Baloo 2',cursive", fontSize: 14, fontWeight: 700, transform: 'rotate(-5deg)' }}>Esgotado</div>
         </div>
       )}
+    </div>
+  )
+}
+
+function MeusPedidos({ pedidos, parasol, onBack, onNovoPedido }) {
+  const ativos = pedidos?.filter(p => ['pago', 'cozinha', 'pronto'].includes(p.statut)) ?? []
+  const finalizados = pedidos?.filter(p => ['entregue', 'cancelado', 'parcial'].includes(p.statut)) ?? []
+
+  return (
+    <div style={{ minHeight: '100vh', background: '#F0F7FF', display: 'flex', flexDirection: 'column' }}>
+      {/* Header */}
+      <div style={{ background: '#0D2137', padding: '20px 20px 24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+          <button onClick={onBack} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 10, width: 36, height: 36, cursor: 'pointer', color: 'white', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            ←
+          </button>
+          <div>
+            <h2 style={{ fontFamily: "'Baloo 2',cursive", fontSize: 20, fontWeight: 800, color: '#F5E6C8' }}>
+              📋 Meus Pedidos
+            </h2>
+            <p style={{ fontSize: 12, color: '#48CAE4' }}>🏖️ Guarda-Sol {parasol}</p>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 40px' }}>
+
+        {/* Nenhum pedido */}
+        {pedidos?.length === 0 && (
+          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <div style={{ fontSize: 64, marginBottom: 16 }}>🏖️</div>
+            <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 20, fontWeight: 700, color: '#0D2137', marginBottom: 8 }}>
+              Nenhum pedido ainda
+            </p>
+            <p style={{ fontSize: 14, color: '#64748B', marginBottom: 24 }}>
+              Faça seu primeiro pedido e acompanhe aqui!
+            </p>
+            <button onClick={onNovoPedido} style={{ background: '#0D2137', color: 'white', border: 'none', borderRadius: 14, padding: '14px 28px', fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>
+              Ver Cardápio
+            </button>
+          </div>
+        )}
+
+        {/* Pedidos ativos */}
+        {ativos.length > 0 && (
+          <>
+            <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D2137', marginBottom: 12 }}>
+              Em andamento
+            </p>
+            {ativos.map(p => <PedidoCard key={p._id} p={p} />)}
+          </>
+        )}
+
+        {/* Pedidos finalizados */}
+        {finalizados.length > 0 && (
+          <>
+            <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 14, fontWeight: 700, color: '#94A3B8', marginBottom: 10, marginTop: ativos.length > 0 ? 20 : 0 }}>
+              Histórico de hoje
+            </p>
+            {finalizados.map(p => <PedidoCard key={p._id} p={p} />)}
+          </>
+        )}
+
+        {/* Botão novo pedido */}
+        {pedidos && pedidos.length > 0 && (
+          <button onClick={onNovoPedido} style={{ width: '100%', background: '#0D2137', color: 'white', border: 'none', borderRadius: 14, padding: 14, fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, cursor: 'pointer', marginTop: 20 }}>
+            + Fazer novo pedido
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function PedidoCard({ p }) {
+  return (
+    <div style={{ background: 'white', borderRadius: 16, overflow: 'hidden', marginBottom: 14, boxShadow: '0 4px 16px rgba(13,33,55,0.1)' }}>
+      {/* Status bar */}
+      <div style={{ background: STATUS_COLOR[p.statut], padding: '10px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 800, color: p.statut === 'pronto' ? '#0D2137' : 'white' }}>
+          Pedido #{p.numero}
+        </span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: p.statut === 'pronto' ? '#0D2137' : 'white' }}>
+          {STATUS_LABEL[p.statut]}
+        </span>
+      </div>
+
+      {/* Animação pronto */}
+      {p.statut === 'pronto' && (
+        <div style={{ background: '#F0FDF4', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #BBF7D0' }}>
+          <span style={{ fontSize: 20 }}>🎉</span>
+          <span style={{ fontSize: 13, color: '#065F46', fontWeight: 600 }}>Seu pedido está pronto! O garçom já está a caminho.</span>
+        </div>
+      )}
+
+      {p.statut === 'cozinha' && (
+        <div style={{ background: '#FFFBEB', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #FDE68A' }}>
+          <span style={{ fontSize: 20 }}>🍳</span>
+          <span style={{ fontSize: 13, color: '#92400E', fontWeight: 600 }}>Seu pedido está sendo preparado com carinho!</span>
+        </div>
+      )}
+
+      {p.statut === 'pago' && (
+        <div style={{ background: '#EFF9FF', padding: '10px 16px', display: 'flex', alignItems: 'center', gap: 8, borderBottom: '1px solid #BAE6FD' }}>
+          <span style={{ fontSize: 20 }}>⏳</span>
+          <span style={{ fontSize: 13, color: '#0369A1', fontWeight: 600 }}>Pagamento confirmado! Aguardando a cozinha.</span>
+        </div>
+      )}
+
+      {/* Itens */}
+      <div style={{ padding: '12px 16px' }}>
+        {p.items.filter(i => !i.annule).map((item, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 14, color: '#374151' }}>
+            <span>{item.qty}× {item.emoji} {item.nom}</span>
+            <span style={{ fontWeight: 600, color: '#0D2137' }}>{fmt(item.qty * item.prixUnit)}</span>
+          </div>
+        ))}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 10, paddingTop: 10, borderTop: '1px solid #F1F5F9' }}>
+          <span style={{ fontSize: 14, color: '#64748B' }}>Total</span>
+          <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 800, color: '#0D2137' }}>
+            {fmt(p.total - p.totalRembourse)}
+          </span>
+        </div>
+        <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 4 }}>
+          {new Date(p.criadoEm).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} · {p.metodoPagamento || '—'}
+        </div>
+      </div>
     </div>
   )
 }
