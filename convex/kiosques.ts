@@ -23,7 +23,6 @@ export const criar = mutation({
   handler: async (ctx, args) => {
     const identity = await assertSuperAdmin(ctx);
 
-    // Verificar slug único
     const existing = await ctx.db
       .query("kiosques")
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
@@ -39,7 +38,6 @@ export const criar = mutation({
       creePar: identity.subject,
     });
 
-    // Categorias padrão
     const cats = [
       { nom: "Bebidas", emoji: "🍺", slug: "bebidas", ordre: 1 },
       { nom: "Frutos do Mar", emoji: "🦐", slug: "frutos", ordre: 2 },
@@ -51,7 +49,6 @@ export const criar = mutation({
       await ctx.db.insert("categories", { kiosqueId, ...cat, actif: true });
     }
 
-    // Parasols padrão (12)
     for (let i = 1; i <= 12; i++) {
       await ctx.db.insert("parasols", {
         kiosqueId,
@@ -127,13 +124,49 @@ export const getMenuComplet = query({
   },
 });
 
-// ── Gestor ───────────────────────────────────────────
+// ── Gestor — Parasols ────────────────────────────────
 
-export const atualizarMercadoPago = mutation({
-  args: { token: v.string() },
-  handler: async (ctx, { token }) => {
+export const listarParasols = query({
+  handler: async (ctx) => {
     const { kiosque } = await getKiosqueDoGestor(ctx);
-    await ctx.db.patch(kiosque._id, { mercadopagoToken: token });
+    return ctx.db
+      .query("parasols")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .collect();
+  },
+});
+
+export const adicionarParasol = mutation({
+  args: { numero: v.string() },
+  handler: async (ctx, { numero }) => {
+    const { kiosque } = await getKiosqueDoGestor(ctx);
+    const existing = await ctx.db
+      .query("parasols")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosque._id))
+      .filter((q) => q.eq(q.field("numero"), numero))
+      .first();
+    if (existing) throw new Error("Guarda-sol já existe");
+    return ctx.db.insert("parasols", {
+      kiosqueId: kiosque._id,
+      numero,
+      actif: true,
+    });
+  },
+});
+
+export const removerParasol = mutation({
+  args: { parasolId: v.id("parasols") },
+  handler: async (ctx, { parasolId }) => {
+    await getKiosqueDoGestor(ctx);
+    await ctx.db.delete(parasolId);
+  },
+});
+
+export const toggleParasol = mutation({
+  args: { parasolId: v.id("parasols"), actif: v.boolean() },
+  handler: async (ctx, { parasolId, actif }) => {
+    await getKiosqueDoGestor(ctx);
+    await ctx.db.patch(parasolId, { actif });
   },
 });
 
@@ -142,5 +175,13 @@ export const liberarParasol = mutation({
   handler: async (ctx, { parasolId }) => {
     await getKiosqueDoGestor(ctx);
     await ctx.db.patch(parasolId, { liberadoEm: Date.now() });
+  },
+});
+
+export const atualizarMercadoPago = mutation({
+  args: { token: v.string() },
+  handler: async (ctx, { token }) => {
+    const { kiosque } = await getKiosqueDoGestor(ctx);
+    await ctx.db.patch(kiosque._id, { mercadopagoToken: token });
   },
 });
