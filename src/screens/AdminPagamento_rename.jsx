@@ -100,9 +100,9 @@ export default function AdminPagamento({ kiosque }) {
       desc: 'Cartão · Internacional',
       color: '#635BFF',
       pubLabel: 'Publishable Key',
-      pubPlaceholder: 'pk_live_xxxxxxxxxxxxxxxxxxxxxxxx',
+      pubPlaceholder: 'sua-chave-publica-stripe-aqui',
       secLabel: 'Secret Key',
-      secPlaceholder: 'sk_live_xxxxxxxxxxxxxxxxxxxxxxxx',
+      secPlaceholder: 'sua-chave-secreta-stripe-aqui',
       guide: [
         'Acessar dashboard.stripe.com',
         'Developers → API Keys',
