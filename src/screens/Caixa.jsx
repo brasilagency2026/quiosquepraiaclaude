@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from 'convex/react'
+import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
 import { useToast } from '../context/ToastContext'
@@ -20,20 +20,32 @@ export default function Caixa() {
   const [pedidoAberto, setPedidoAberto] = useState(null)
 
   const kiosque = useQuery(api.kiosques.getBySlug, { slug })
+  const pedidosActifs = useQuery(api.pedidos.getPedidosActifs, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const historico = useQuery(api.pedidos.getHistorico, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const stats = useQuery(api.pedidos.getEstatisticas, kiosque ? { kiosqueId: kiosque._id } : 'skip')
 
   if (isLoading) return <Loading />
   if (!session || session.role !== 'caixa') { navigate(`/login/${slug}`); return null }
 
-  const pedidosFiltrados = historico?.filter(p => {
-    if (filtro === 'todos') return true
-    return p.statut === filtro
-  }) ?? []
+  // Fusionar pedidos ativos + histórico sem duplicatas
+  const todosPedidos = (() => {
+    const mapa = new Map()
+    ;(historico ?? []).forEach(p => mapa.set(p._id, p))
+    ;(pedidosActifs ?? []).forEach(p => mapa.set(p._id, p))
+    return Array.from(mapa.values()).sort((a, b) => b.criadoEm - a.criadoEm)
+  })()
+
+  const pedidosFiltrados = todosPedidos.filter(p =>
+    filtro === 'todos' ? true : p.statut === filtro
+  )
 
   const totalFiltrado = pedidosFiltrados
     .filter(p => p.statut !== 'cancelado')
     .reduce((s, p) => s + p.total - p.totalRembourse, 0)
+
+  const novos = pedidosActifs?.filter(p => p.statut === 'pago') ?? []
+  const emPreparo = pedidosActifs?.filter(p => p.statut === 'cozinha') ?? []
+  const prontos = pedidosActifs?.filter(p => p.statut === 'pronto') ?? []
 
   return (
     <div style={{ minHeight: '100vh', background: '#F8FAFC', display: 'flex', flexDirection: 'column' }}>
@@ -56,7 +68,10 @@ export default function Caixa() {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 0 }}>
-          {[{ id: 'hoje', label: '📊 Hoje' }, { id: 'pedidos', label: '🧾 Pedidos' }].map(t => (
+          {[
+            { id: 'hoje', label: '📊 Hoje' },
+            { id: 'pedidos', label: `🧾 Pedidos${novos.length > 0 ? ` (${novos.length} novos)` : ''}` },
+          ].map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
               background: 'none', border: 'none', padding: '10px 16px',
               color: tab === t.id ? 'white' : 'rgba(255,255,255,0.5)',
@@ -77,9 +92,9 @@ export default function Caixa() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
               {[
                 { label: 'Faturamento', val: fmt(stats?.faturamentoHoje ?? 0), icon: '💰', color: '#0D3B66' },
-                { label: 'Pedidos', val: stats?.totalHoje ?? 0, icon: '🧾', color: '#0D3B66' },
+                { label: 'Pedidos Hoje', val: stats?.totalHoje ?? 0, icon: '🧾', color: '#0D3B66' },
                 { label: 'Ticket Médio', val: fmt(stats?.ticketMedio ?? 0), icon: '📊', color: '#0D3B66' },
-                { label: 'Em Preparo', val: (stats?.pendentes ?? 0) + (stats?.emPreparo ?? 0), icon: '🍳', color: '#0D3B66' },
+                { label: 'Aguardando', val: novos.length, icon: '⏳', color: '#00B4D8' },
               ].map(s => (
                 <div key={s.label} style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
                   <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
@@ -89,16 +104,16 @@ export default function Caixa() {
               ))}
             </div>
 
-            {/* Status em tempo real */}
+            {/* Status tempo real */}
             <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: '0 2px 12px rgba(0,0,0,0.06)', marginBottom: 20 }}>
               <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D3B66', marginBottom: 14 }}>
                 Status em tempo real
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
                 {[
-                  { label: 'Aguardando', val: stats?.pendentes ?? 0, color: '#00B4D8', bg: '#EFF9FF' },
-                  { label: 'Cozinha', val: stats?.emPreparo ?? 0, color: '#F59E0B', bg: '#FFFBEB' },
-                  { label: 'Prontos', val: stats?.prontos ?? 0, color: '#06D6A0', bg: '#F0FDF4' },
+                  { label: 'Novos', val: novos.length, color: '#00B4D8', bg: '#EFF9FF' },
+                  { label: 'Cozinha', val: emPreparo.length, color: '#F59E0B', bg: '#FFFBEB' },
+                  { label: 'Prontos', val: prontos.length, color: '#06D6A0', bg: '#F0FDF4' },
                 ].map(s => (
                   <div key={s.label} style={{ background: s.bg, borderRadius: 12, padding: '12px 8px', textAlign: 'center' }}>
                     <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 26, fontWeight: 800, color: s.color }}>{s.val}</div>
@@ -108,13 +123,44 @@ export default function Caixa() {
               </div>
             </div>
 
-            {/* Últimos pedidos */}
-            <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D3B66', marginBottom: 12 }}>
-              Últimos pedidos
-            </p>
-            {historico?.slice(0, 10).map(p => (
-              <PedidoCard key={p._id} p={p} onClick={() => setPedidoAberto(p)} />
-            ))}
+            {/* Novos pedidos */}
+            {novos.length > 0 && (
+              <>
+                <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 700, color: '#00B4D8', marginBottom: 10 }}>
+                  🔵 Aguardando preparo
+                </p>
+                {novos.map(p => <PedidoCard key={p._id} p={p} onClick={() => setPedidoAberto(p)} />)}
+              </>
+            )}
+
+            {/* Prontos */}
+            {prontos.length > 0 && (
+              <>
+                <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 700, color: '#06D6A0', marginBottom: 10, marginTop: 16 }}>
+                  🟢 Prontos para entrega
+                </p>
+                {prontos.map(p => <PedidoCard key={p._id} p={p} onClick={() => setPedidoAberto(p)} />)}
+              </>
+            )}
+
+            {novos.length === 0 && prontos.length === 0 && emPreparo.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '30px 0', color: '#94A3B8' }}>
+                <div style={{ fontSize: 48 }}>✅</div>
+                <p style={{ marginTop: 8, fontSize: 15 }}>Tudo em dia!</p>
+              </div>
+            )}
+
+            {/* Histórico entregues/cancelados */}
+            {(historico?.filter(p => ['entregue', 'cancelado', 'parcial'].includes(p.statut)) ?? []).length > 0 && (
+              <>
+                <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 14, fontWeight: 700, color: '#94A3B8', marginBottom: 10, marginTop: 20 }}>
+                  Histórico de hoje
+                </p>
+                {historico.filter(p => ['entregue', 'cancelado', 'parcial'].includes(p.statut)).slice(0, 10).map(p => (
+                  <PedidoCard key={p._id} p={p} onClick={() => setPedidoAberto(p)} />
+                ))}
+              </>
+            )}
           </>
         )}
 
@@ -144,13 +190,11 @@ export default function Caixa() {
               ))}
             </div>
 
-            {/* Resumo filtrado */}
-            {filtro !== 'cancelado' && (
-              <div style={{ background: 'white', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
-                <span style={{ fontSize: 13, color: '#64748B' }}>{pedidosFiltrados.length} pedido{pedidosFiltrados.length !== 1 ? 's' : ''}</span>
-                <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D3B66' }}>{fmt(totalFiltrado)}</span>
-              </div>
-            )}
+            {/* Resumo */}
+            <div style={{ background: 'white', borderRadius: 12, padding: '12px 16px', marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+              <span style={{ fontSize: 13, color: '#64748B' }}>{pedidosFiltrados.length} pedido{pedidosFiltrados.length !== 1 ? 's' : ''}</span>
+              <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#0D3B66' }}>{fmt(totalFiltrado)}</span>
+            </div>
 
             {pedidosFiltrados.length === 0 && (
               <div style={{ textAlign: 'center', padding: 60, color: '#94A3B8' }}>
