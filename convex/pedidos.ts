@@ -28,6 +28,21 @@ export const getPedidosProntos = query({
   },
 });
 
+// Appels dinheiro en attente de collecte (statut pago + metodoPagamento dinheiro)
+export const getPedidosDinheiro = query({
+  args: { kiosqueId: v.id("kiosques") },
+  handler: async (ctx, { kiosqueId }) => {
+    const todos = await ctx.db
+      .query("pedidos")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
+      .collect();
+    return todos.filter(
+      (p) => p.metodoPagamento === "dinheiro" &&
+             ["pago", "cozinha", "pronto"].includes(p.statut)
+    );
+  },
+});
+
 export const getHistorico = query({
   args: { kiosqueId: v.id("kiosques") },
   handler: async (ctx, { kiosqueId }) => {

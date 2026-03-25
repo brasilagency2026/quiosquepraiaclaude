@@ -106,7 +106,6 @@ export default function Pagamento({ total, cart, onBack, onConfirm }) {
 }
 
 function DinheiroSection({ total, dinheiroOferecido, setDinheiroOferecido, troco, trocoNegativo }) {
-  // Sugestões de valores
   const notas = [2, 5, 10, 20, 50, 100, 200]
   const sugeridas = []
   for (const n of notas) {
@@ -172,7 +171,6 @@ function DinheiroSection({ total, dinheiroOferecido, setDinheiroOferecido, troco
         <div style={{ background: '#F0FDF4', border: '2px solid #06D6A0', borderRadius: 14, padding: 16, textAlign: 'center' }}>
           <p style={{ fontSize: 13, color: '#065F46', marginBottom: 4 }}>Troco que você vai receber</p>
           <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#059669' }}>{fmt(troco)}</p>
-          <TrocoDetalhado troco={troco} />
         </div>
       )}
       {troco === 0 && dinheiroOferecido && (
@@ -180,30 +178,6 @@ function DinheiroSection({ total, dinheiroOferecido, setDinheiroOferecido, troco
           <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: 'var(--ocean)' }}>✅ Valor exato — sem troco!</p>
         </div>
       )}
-    </div>
-  )
-}
-
-function TrocoDetalhado({ troco }) {
-  const denominacoes = [100, 50, 20, 10, 5, 2, 1, 0.50, 0.25, 0.10, 0.05, 0.01]
-  const resultado = []
-  let resto = Math.round(troco * 100) / 100
-  for (const d of denominacoes) {
-    const qtd = Math.floor(Math.round(resto / d * 100) / 100)
-    if (qtd > 0) { resultado.push({ valor: d, qtd }); resto = Math.round((resto - d * qtd) * 100) / 100 }
-    if (resto <= 0) break
-  }
-  if (!resultado.length) return null
-  return (
-    <div style={{ marginTop: 10, borderTop: '1px solid #BBF7D0', paddingTop: 10 }}>
-      <p style={{ fontSize: 11, color: '#065F46', marginBottom: 6 }}>Composição do troco</p>
-      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', justifyContent: 'center' }}>
-        {resultado.map(({ valor, qtd }) => (
-          <div key={valor} style={{ background: 'white', borderRadius: 8, padding: '4px 8px', fontSize: 12, fontWeight: 700, color: '#059669', border: '1px solid #BBF7D0' }}>
-            {qtd}× {valor >= 1 ? `R$${valor}` : `${Math.round(valor * 100)}¢`}
-          </div>
-        ))}
-      </div>
     </div>
   )
 }
