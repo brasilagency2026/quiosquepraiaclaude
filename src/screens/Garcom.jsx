@@ -23,7 +23,7 @@ export default function Garcom() {
   if (!session || session.role !== 'garcom') { navigate(`/login/${slug}`); return null }
 
   async function marcarEntregue(pedidoId, numero) {
-    await atualizarStatut({ pedidoId, statut: 'entregue' })
+    await atualizarStatut({ pedidoId, statut: 'entregue', garcomNom: session?.nom })
     showToast(`🏖️ Pedido #${numero} entregue!`)
   }
 

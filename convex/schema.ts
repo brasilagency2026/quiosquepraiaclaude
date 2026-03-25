@@ -81,6 +81,8 @@ export default defineSchema({
     observacao: v.optional(v.string()),
     motivoCancelamento: v.optional(v.string()),
     notaCancelamento: v.optional(v.string()),
+    garcomNom: v.optional(v.string()),
+    entregueEm: v.optional(v.number()),
     criadoEm: v.number(),
   })
     .index("by_kiosque", ["kiosqueId"])

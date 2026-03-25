@@ -122,9 +122,41 @@ export const atualizarStatut = mutation({
       v.literal("pronto"),
       v.literal("entregue")
     ),
+    garcomNom: v.optional(v.string()),
   },
-  handler: async (ctx, { pedidoId, statut }) => {
-    await ctx.db.patch(pedidoId, { statut });
+  handler: async (ctx, { pedidoId, statut, garcomNom }) => {
+    const patch: any = { statut };
+    if (statut === "entregue") {
+      patch.entregueEm = Date.now();
+      if (garcomNom) patch.garcomNom = garcomNom;
+    }
+    await ctx.db.patch(pedidoId, patch);
+  },
+});
+
+export const getEstatisticasGarcom = query({
+  args: { kiosqueId: v.id("kiosques") },
+  handler: async (ctx, { kiosqueId }) => {
+    const hoje = new Date().setHours(0, 0, 0, 0);
+    const pedidos = await ctx.db
+      .query("pedidos")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
+      .collect();
+
+    const entreguesHoje = pedidos.filter(
+      (p) => p.statut === "entregue" && p.criadoEm >= hoje
+    );
+
+    // Agrupar por garçom
+    const porGarcom: Record<string, { nom: string; total: number; valor: number }> = {};
+    for (const p of entreguesHoje) {
+      const nom = p.garcomNom || "Sem registro";
+      if (!porGarcom[nom]) porGarcom[nom] = { nom, total: 0, valor: 0 };
+      porGarcom[nom].total += 1;
+      porGarcom[nom].valor += p.total - p.totalRembourse;
+    }
+
+    return Object.values(porGarcom).sort((a, b) => b.total - a.total);
   },
 });
 

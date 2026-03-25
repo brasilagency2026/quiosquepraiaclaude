@@ -19,6 +19,7 @@ export default function Admin() {
   const kiosque = useQuery(api.kiosques.getBySlug, { slug })
   const stats = useQuery(api.pedidos.getEstatisticas, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const historico = useQuery(api.pedidos.getHistorico, kiosque ? { kiosqueId: kiosque._id } : 'skip')
+  const statsGarcom = useQuery(api.pedidos.getEstatisticasGarcom, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const categorias = useQuery(api.cardapio.listarCategorias, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const items = useQuery(api.cardapio.listarItems, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const funcionarios = useQuery(api.pinAuth.listarFuncionarios, kiosque ? { kiosqueId: kiosque._id } : 'skip')
@@ -70,7 +71,7 @@ export default function Admin() {
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 16px 80px' }}>
-        {tab === 'dashboard' && <DashboardTab stats={stats} historico={historico} notifs={notifs} kiosque={kiosque} showToast={showToast} />}
+        {tab === 'dashboard' && <DashboardTab stats={stats} historico={historico} notifs={notifs} kiosque={kiosque} showToast={showToast} statsGarcom={statsGarcom} />}
         {tab === 'cardapio' && <CardapioTab items={items} categorias={categorias} kiosque={kiosque} showToast={showToast} />}
         {tab === 'categorias' && <CategoriasTab categorias={categorias} kiosque={kiosque} showToast={showToast} />}
         {tab === 'equipe' && <EquipeTab funcionarios={funcionarios} kiosque={kiosque} showToast={showToast} />}
@@ -82,7 +83,7 @@ export default function Admin() {
 }
 
 // ── Dashboard ─────────────────────────────────────────
-function DashboardTab({ stats, historico, notifs, kiosque, showToast }) {
+function DashboardTab({ stats, historico, notifs, kiosque, showToast, statsGarcom }) {
   const marcarLida = useMutation(api.notifications.marcarLida)
   const unread = notifs?.filter(n => !n.lue) ?? []
 
@@ -130,6 +131,30 @@ function DashboardTab({ stats, historico, notifs, kiosque, showToast }) {
       </div>
 
       {/* Histórico */}
+      {/* Stats por Garçom */}
+      {statsGarcom && statsGarcom.length > 0 && (
+        <>
+          <p className="section-title">Entregas por Garçom — Hoje</p>
+          <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-card)', marginBottom: 24 }}>
+            {statsGarcom.map((g, i) => (
+              <div key={g.nom} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < statsGarcom.length - 1 ? '1px solid #F1F5F9' : 'none' }}>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#EFF9FF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                  🛵
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text-primary)' }}>{g.nom}</div>
+                  <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{fmt(g.valor)} entregues</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 22, fontWeight: 800, color: 'var(--ocean)' }}>{g.total}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>pedidos</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <p className="section-title">Pedidos Recentes</p>
       <div style={{ background: 'white', borderRadius: 16, padding: 16, boxShadow: 'var(--shadow-card)' }}>
         {!historico && <div style={{ color: 'var(--text-muted)', fontSize: 14 }}>Carregando...</div>}
