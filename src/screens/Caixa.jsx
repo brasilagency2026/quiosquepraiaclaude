@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
+import { useAlerteSonore } from '../hooks/useAlerteSonore'
 import { useToast } from '../context/ToastContext'
 
 const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
@@ -25,6 +26,8 @@ export default function Caixa() {
   const stats = useQuery(api.pedidos.getEstatisticas, kiosque ? { kiosqueId: kiosque._id } : 'skip')
 
   if (isLoading) return <Loading />
+  useAlerteSonore(pedidosActifs, 'caixa', p => p.statut === 'pago')
+
   if (!session || session.role !== 'caixa') { navigate(`/login/${slug}`); return null }
 
   // Fusionar pedidos ativos + histórico sem duplicatas

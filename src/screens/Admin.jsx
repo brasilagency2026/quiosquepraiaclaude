@@ -6,6 +6,7 @@ import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
 import EmojiPicker from '../components/EmojiPicker'
 import AdminPagamento from './AdminPagamento'
+import { useAlerteSonore } from '../hooks/useAlerteSonore'
 
 const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
 
@@ -24,6 +25,8 @@ export default function Admin() {
   const items = useQuery(api.cardapio.listarItems, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const funcionarios = useQuery(api.pinAuth.listarFuncionarios, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const notifs = useQuery(api.notifications.listar, kiosque ? { kiosqueId: kiosque._id } : 'skip')
+
+  useAlerteSonore(notifs, 'admin', n => !n.lue)
 
   if (!isLoaded) return <Loading />
   if (!user) { navigate(`/admin/${slug}/login`); return null }

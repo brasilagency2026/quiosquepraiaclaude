@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
+import { useAlerteSonore } from '../hooks/useAlerteSonore'
 import { useToast } from '../context/ToastContext'
 
 const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
@@ -18,6 +19,8 @@ export default function Garcom() {
     kiosque ? { kiosqueId: kiosque._id } : 'skip'
   )
   const atualizarStatut = useMutation(api.pedidos.atualizarStatut)
+
+  useAlerteSonore(pedidos, 'garcom')
 
   if (isLoading) return <Loading />
   if (!session || session.role !== 'garcom') { navigate(`/login/${slug}`); return null }

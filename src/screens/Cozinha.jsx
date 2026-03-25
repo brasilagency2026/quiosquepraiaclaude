@@ -5,6 +5,7 @@ import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
 import { useToast } from '../context/ToastContext'
 import CancelModal from '../components/CancelModal'
+import { useAlerteSonore } from '../hooks/useAlerteSonore'
 
 export default function Cozinha() {
   const { slug } = useParams()
@@ -36,6 +37,8 @@ export default function Cozinha() {
 
   // Auth check
   if (isLoading) return <Loading />
+  useAlerteSonore(pedidos, 'cozinha', p => p.statut === 'pago')
+
   if (!session || session.role !== 'cozinha') {
     navigate(`/login/${slug}`)
     return null
