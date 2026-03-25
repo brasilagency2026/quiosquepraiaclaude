@@ -36,8 +36,9 @@ export default function Cozinha() {
   }, [pedidos])
 
   // Auth check
-  if (isLoading) return <Loading />
   useAlerteSonore(pedidos, 'cozinha', p => p.statut === 'pago')
+
+  if (isLoading) return <Loading />
 
   if (!session || session.role !== 'cozinha') {
     navigate(`/login/${slug}`)

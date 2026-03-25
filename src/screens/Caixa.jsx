@@ -25,8 +25,9 @@ export default function Caixa() {
   const historico = useQuery(api.pedidos.getHistorico, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const stats = useQuery(api.pedidos.getEstatisticas, kiosque ? { kiosqueId: kiosque._id } : 'skip')
 
-  if (isLoading) return <Loading />
   useAlerteSonore(pedidosActifs, 'caixa', p => p.statut === 'pago')
+
+  if (isLoading) return <Loading />
 
   if (!session || session.role !== 'caixa') { navigate(`/login/${slug}`); return null }
 
