@@ -2,7 +2,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
-import { useAlerteSonore } from '../hooks/useAlerteSonore'
 import { useToast } from '../context/ToastContext'
 
 const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
@@ -19,8 +18,6 @@ export default function Garcom() {
     kiosque ? { kiosqueId: kiosque._id } : 'skip'
   )
   const atualizarStatut = useMutation(api.pedidos.atualizarStatut)
-
-  useAlerteSonore(pedidos, 'garcom')
 
   if (isLoading) return <Loading />
   if (!session || session.role !== 'garcom') { navigate(`/login/${slug}`); return null }
@@ -68,12 +65,35 @@ export default function Garcom() {
                 <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Total:</span>
                 <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: 'var(--ocean)' }}>{fmt(pedido.total - pedido.totalRembourse)}</span>
               </div>
+              {pedido.metodoPagamento === 'dinheiro' && (
+                <div style={{ background: '#FFF9E6', border: '2px solid #F59E0B', borderRadius: 12, padding: 14, marginTop: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <span style={{ fontSize: 18 }}>💵</span>
+                    <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 800, color: '#92400E' }}>Cobrar em Dinheiro</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+                    <span style={{ fontSize: 13, color: '#78350F' }}>Cliente pagará:</span>
+                    <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 700, color: '#92400E' }}>{fmt(pedido.dinheiroOferecido ?? pedido.total)}</span>
+                  </div>
+                  {pedido.troco > 0 && (
+                    <div style={{ background: '#06D6A0', borderRadius: 10, padding: '10px 14px', marginTop: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 14, fontWeight: 700, color: '#0D2137' }}>💰 Dar troco:</span>
+                      <span style={{ fontFamily: "'Baloo 2',cursive", fontSize: 22, fontWeight: 800, color: '#0D2137' }}>{fmt(pedido.troco)}</span>
+                    </div>
+                  )}
+                  {pedido.troco === 0 && (
+                    <div style={{ background: '#EFF9FF', borderRadius: 10, padding: '8px 14px', marginTop: 8, textAlign: 'center' }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--ocean)' }}>✅ Valor exato — sem troco</span>
+                    </div>
+                  )}
+                </div>
+              )}
               <button onClick={() => marcarEntregue(pedido._id, pedido.numero)} style={{
-                width: '100%', background: 'var(--ocean)', color: 'white', border: 'none',
+                width: '100%', background: pedido.metodoPagamento === 'dinheiro' ? '#F59E0B' : 'var(--ocean)', color: pedido.metodoPagamento === 'dinheiro' ? '#0D2137' : 'white', border: 'none',
                 borderRadius: 10, padding: 12, fontFamily: "'Baloo 2',cursive",
                 fontSize: 16, fontWeight: 700, cursor: 'pointer', marginTop: 12, transition: 'all 0.2s'
               }}>
-                🏖️ Entregue no Guarda-Sol!
+                {pedido.metodoPagamento === 'dinheiro' ? '💵 Dinheiro Recebido — Entregue!' : '🏖️ Entregue no Guarda-Sol!'}
               </button>
             </div>
           </div>

@@ -83,6 +83,8 @@ export default defineSchema({
     notaCancelamento: v.optional(v.string()),
     garcomNom: v.optional(v.string()),
     entregueEm: v.optional(v.number()),
+    dinheiroOferecido: v.optional(v.number()),
+    troco: v.optional(v.number()),
     criadoEm: v.number(),
   })
     .index("by_kiosque", ["kiosqueId"])

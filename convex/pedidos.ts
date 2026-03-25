@@ -88,6 +88,8 @@ export const criar = mutation({
     pagamentoId: v.optional(v.string()),
     metodoPagamento: v.optional(v.string()),
     observacao: v.optional(v.string()),
+    dinheiroOferecido: v.optional(v.number()),
+    troco: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const hoje = new Date().setHours(0, 0, 0, 0);
@@ -109,6 +111,8 @@ export const criar = mutation({
       pagamentoId: args.pagamentoId,
       metodoPagamento: args.metodoPagamento,
       observacao: args.observacao,
+      dinheiroOferecido: args.dinheiroOferecido,
+      troco: args.troco,
       criadoEm: Date.now(),
     });
   },

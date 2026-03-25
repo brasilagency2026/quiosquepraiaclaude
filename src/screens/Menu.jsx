@@ -41,7 +41,7 @@ export default function Menu() {
     ? categories
     : categories.filter(c => c.slug === activecat)
 
-  async function handleConfirmPayment(method) {
+  async function handleConfirmPayment(method, dinheiroInfo = null) {
     try {
       const id = await criarPedido({
         kiosqueId: kiosque._id,
@@ -55,7 +55,9 @@ export default function Menu() {
         })),
         total,
         metodoPagamento: method,
-        pagamentoId: 'MP-' + Date.now(),
+        pagamentoId: method === 'dinheiro' ? 'CASH-' + Date.now() : 'MP-' + Date.now(),
+        dinheiroOferecido: dinheiroInfo?.dinheiroOferecido,
+        troco: dinheiroInfo?.troco,
       })
       const num = Math.floor(Math.random() * 90) + 10
       setPedidoId(id)
