@@ -29,6 +29,11 @@ export default function Garcom() {
     showToast(`🏖️ Pedido #${numero} entregue!`)
   }
 
+  async function confirmarDinheiroRecebido(pedidoId, numero) {
+    await atualizarStatut({ pedidoId, statut: 'cozinha', garcomNom: session?.nom })
+    showToast(`✅ Pagamento recebido! Pedido #${numero} enviado à cozinha.`)
+  }
+
   const totalPendente = (pedidosProntos?.length ?? 0) + (pedidosDinheiro?.length ?? 0)
 
   return (
@@ -88,8 +93,8 @@ export default function Garcom() {
                       </div>
                     )}
                   </div>
-                  <button onClick={() => marcarEntregue(pedido._id, pedido.numero)} style={{ width: '100%', background: '#F59E0B', color: '#0D2137', border: 'none', borderRadius: 10, padding: 14, fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}>
-                    💵 Dinheiro Recebido — Entregue!
+                  <button onClick={() => confirmarDinheiroRecebido(pedido._id, pedido.numero)} style={{ width: '100%', background: '#F59E0B', color: '#0D2137', border: 'none', borderRadius: 10, padding: 14, fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, cursor: 'pointer', marginTop: 12 }}>
+                    💵 Dinheiro Recebido — Enviar à Cozinha!
                   </button>
                 </div>
               </div>
