@@ -39,8 +39,7 @@ export const getPedidosDinheiro = query({
       .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
       .collect();
     return todos.filter(
-      (p) => p.metodoPagamento === "dinheiro" &&
-             ["pago", "cozinha", "pronto"].includes(p.statut)
+      (p) => p.metodoPagamento === "dinheiro" && p.statut === "pago"
     );
   },
 });
