@@ -88,6 +88,7 @@ export default function Menu() {
   if (screen === 'payment') return (
     <Pagamento
       total={total} cart={cart}
+      slug={slug}
       onBack={() => setScreen('cart')}
       onConfirm={handleConfirmPayment}
     />
