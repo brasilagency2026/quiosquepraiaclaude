@@ -115,7 +115,7 @@ export const criar = mutation({
     const numero =
       pedidosHoje.filter((p) => p.criadoEm >= hoje).length + 1;
 
-    return ctx.db.insert("pedidos", {
+    const pedidoId = await ctx.db.insert("pedidos", {
       kiosqueId: args.kiosqueId,
       parasolNumero: args.parasolNumero,
       numero,
@@ -130,6 +130,7 @@ export const criar = mutation({
       troco: args.troco,
       criadoEm: Date.now(),
     });
+    return { id: pedidoId, numero };
   },
 });
 

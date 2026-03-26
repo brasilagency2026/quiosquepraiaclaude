@@ -43,7 +43,7 @@ export default function Menu() {
 
   async function handleConfirmPayment(method, dinheiroInfo = null) {
     try {
-      const id = await criarPedido({
+      const result = await criarPedido({
         kiosqueId: kiosque._id,
         parasolNumero: parasol,
         items: cart.map(i => ({
@@ -59,9 +59,8 @@ export default function Menu() {
         dinheiroOferecido: dinheiroInfo?.dinheiroOferecido,
         troco: dinheiroInfo?.troco,
       })
-      const num = Math.floor(Math.random() * 90) + 10
-      setPedidoId(id)
-      setPedidoNumero(num)
+      setPedidoId(result.id)
+      setPedidoNumero(result.numero)
       clearCart()
       setScreen('confirmed')
     } catch (e) {
