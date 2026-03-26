@@ -11,9 +11,11 @@ export const getPedidosActifs = query({
       .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
       .order("asc")
       .collect();
-    return todos.filter((p) =>
-      ["pago", "cozinha", "pronto"].includes(p.statut)
-    );
+    return todos.filter((p) => {
+      // Dinheiro em pago = aguardando garçom confirmar pagamento → NÃO vai para cozinha
+      if (p.statut === "pago" && p.metodoPagamento === "dinheiro") return false;
+      return ["pago", "cozinha", "pronto"].includes(p.statut);
+    });
   },
 });
 
