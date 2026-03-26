@@ -6,7 +6,6 @@ import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
 import EmojiPicker from '../components/EmojiPicker'
 import AdminPagamento from './AdminPagamento'
-import { useAlerteSonore } from '../hooks/useAlerteSonore'
 
 const fmt = v => 'R$ ' + Number(v).toFixed(2).replace('.', ',')
 
@@ -25,8 +24,6 @@ export default function Admin() {
   const items = useQuery(api.cardapio.listarItems, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const funcionarios = useQuery(api.pinAuth.listarFuncionarios, kiosque ? { kiosqueId: kiosque._id } : 'skip')
   const notifs = useQuery(api.notifications.listar, kiosque ? { kiosqueId: kiosque._id } : 'skip')
-
-  useAlerteSonore(notifs, 'admin', n => !n.lue)
 
   if (!isLoaded) return <Loading />
   if (!user) { navigate(`/admin/${slug}/login`); return null }
@@ -342,7 +339,7 @@ function CategoriasTab({ categorias, kiosque, showToast }) {
 // ── Equipe ─────────────────────────────────────────
 function EquipeTab({ funcionarios, kiosque, showToast }) {
   const [showModal, setShowModal] = useState(false)
-  const [form, setForm] = useState({ nom: '', telephone: '', role: 'garcom', pin: '' })
+  const [form, setForm] = useState({ nom: '', role: 'garcom', pin: '' })
   const criarFunc = useMutation(api.pinAuth.criarFuncionario)
   const desativar = useMutation(api.pinAuth.desativarFuncionario)
 
@@ -353,9 +350,9 @@ function EquipeTab({ funcionarios, kiosque, showToast }) {
   async function save() {
     if (!form.nom || !form.pin || form.pin.length !== 4) { showToast('⚠️ Preencha nome e PIN com 4 dígitos'); return }
     try {
-      await criarFunc({ nom: form.nom, telephone: form.telephone, role: form.role, pin: form.pin })
+      await criarFunc({ nom: form.nom, role: form.role, pin: form.pin })
       showToast('✅ Funcionário adicionado!')
-      setShowModal(false); setForm({ nom: '', telephone: '', role: 'garcom', pin: '' })
+      setShowModal(false); setForm({ nom: '', role: 'garcom', pin: '' })
     } catch (e) { showToast('❌ ' + e.message) }
   }
 
@@ -373,7 +370,6 @@ function EquipeTab({ funcionarios, kiosque, showToast }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 600, fontSize: 15, color: 'var(--text-primary)' }}>{f.nom}</div>
-            <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>{f.telephone || '—'}</div>
           </div>
           <span style={{ background: ROLE_COLORS[f.role], color: ROLE_TEXT[f.role], padding: '3px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {f.role}
@@ -389,7 +385,6 @@ function EquipeTab({ funcionarios, kiosque, showToast }) {
             <div className="modal-handle" />
             <div className="modal-title">Novo Funcionário</div>
             <div className="form-group"><label className="form-label">Nome</label><input className="form-input" value={form.nom} onChange={e => setForm(f => ({ ...f, nom: e.target.value }))} placeholder="Nome completo" /></div>
-            <div className="form-group"><label className="form-label">WhatsApp</label><input className="form-input" value={form.telephone} onChange={e => setForm(f => ({ ...f, telephone: e.target.value }))} placeholder="(13) 99999-9999" /></div>
             <div className="form-group">
               <label className="form-label">Função</label>
               <select className="form-input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
