@@ -5,7 +5,6 @@ import { api } from '../../convex/_generated/api'
 import { useAuthPIN } from '../hooks/useAuth'
 import { useToast } from '../context/ToastContext'
 import CancelModal from '../components/CancelModal'
-import { useAlerteSonore } from '../hooks/useAlerteSonore'
 
 export default function Cozinha() {
   const { slug } = useParams()
@@ -36,10 +35,7 @@ export default function Cozinha() {
   }, [pedidos])
 
   // Auth check
-  useAlerteSonore(pedidos, 'cozinha', p => p.statut === 'pago')
-
   if (isLoading) return <Loading />
-
   if (!session || session.role !== 'cozinha') {
     navigate(`/login/${slug}`)
     return null
@@ -56,7 +52,7 @@ export default function Cozinha() {
     setCancelOrder(null)
   }
 
-  const pending = pedidos?.filter(p => p.statut === 'pago') ?? []
+  const pending = pedidos?.filter(p => p.statut === 'pago' && p.metodoPagamento !== 'dinheiro') ?? []
   const making  = pedidos?.filter(p => p.statut === 'cozinha') ?? []
   const ready   = pedidos?.filter(p => p.statut === 'pronto') ?? []
 
