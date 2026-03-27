@@ -48,10 +48,10 @@ export default function Menu() {
         parasolNumero: parasol,
         items: cart.map(i => ({
           itemId: i._id,
-          nom: i.nom,
+          nom: i.variacaoNom ? `${i.nom} (${i.variacaoNom})` : i.nom,
           emoji: i.emoji,
           qty: i.qty,
-          prixUnit: i.prix,
+          prixUnit: i.prixEffectif ?? i.prix,
           obs: i.obs || undefined,
         })),
         total,
@@ -185,7 +185,7 @@ export default function Menu() {
       {/* Item modal */}
       {modalItem && (
         <ItemModal item={modalItem} onClose={() => setModalItem(null)}
-          onAdd={(qty, obs) => { addItem(modalItem, qty, obs); setModalItem(null); showToast(`${modalItem.emoji} adicionado!`) }}
+          onAdd={(qty, obs, variacao) => { addItem(modalItem, qty, obs, variacao); setModalItem(null); showToast(`${modalItem.emoji} adicionado!`) }}
         />
       )}
     </div>

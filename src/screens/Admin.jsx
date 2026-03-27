@@ -184,7 +184,7 @@ function DashboardTab({ stats, historico, notifs, kiosque, showToast, statsGarco
 function CardapioTab({ items, categorias, kiosque, showToast }) {
   const [showModal, setShowModal] = useState(false)
   const [editing, setEditing] = useState(null)
-  const [form, setForm] = useState({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: '' })
+  const [form, setForm] = useState({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: '', variacoes: [] })
   const criarItem = useMutation(api.cardapio.criarItem)
   const editarItem = useMutation(api.cardapio.editarItem)
   const excluirItem = useMutation(api.cardapio.excluirItem)
@@ -194,19 +194,19 @@ function CardapioTab({ items, categorias, kiosque, showToast }) {
     if (!form.nom || !form.prix || !form.categorieId) { showToast('⚠️ Preencha todos os campos'); return }
     try {
       if (editing) {
-        await editarItem({ itemId: editing._id, nom: form.nom, description: form.description, prix: parseFloat(form.prix), emoji: form.emoji, categorieId: form.categorieId })
+        await editarItem({ itemId: editing._id, nom: form.nom, description: form.description, prix: parseFloat(form.prix || '0'), emoji: form.emoji, categorieId: form.categorieId, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
         showToast('✅ Item atualizado!')
       } else {
-        await criarItem({ categorieId: form.categorieId, nom: form.nom, description: form.description, prix: parseFloat(form.prix), emoji: form.emoji })
+        await criarItem({ categorieId: form.categorieId, nom: form.nom, description: form.description, prix: parseFloat(form.prix || '0'), emoji: form.emoji, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
         showToast('✅ Item adicionado!')
       }
-      setShowModal(false); setEditing(null); setForm({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: '' })
+      setShowModal(false); setEditing(null); setForm({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: '', variacoes: [] })
     } catch (e) { showToast('❌ ' + e.message) }
   }
 
   return (
     <>
-      <button onClick={() => { setEditing(null); setForm({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: categorias?.[0]?._id ?? '' }); setShowModal(true) }}
+      <button onClick={() => { setEditing(null); setForm({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: categorias?.[0]?._id ?? '', variacoes: [] }); setShowModal(true) }}
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 16, padding: 14, width: '100%', fontFamily: "'Baloo 2',cursive", fontSize: 17, fontWeight: 700, cursor: 'pointer', marginBottom: 20 }}>
         + Adicionar Item
       </button>
@@ -229,7 +229,7 @@ function CardapioTab({ items, categorias, kiosque, showToast }) {
                 <span style={{ position: 'absolute', width: 18, height: 18, background: 'white', borderRadius: '50%', top: 3, left: item.disponible ? 23 : 3, transition: '0.3s' }} />
               </span>
             </label>
-            <button onClick={() => { setEditing(item); setForm({ nom: item.nom, description: item.description, prix: String(item.prix), emoji: item.emoji, categorieId: item.categorieId }); setShowModal(true) }}
+            <button onClick={() => { setEditing(item); setForm({ nom: item.nom, description: item.description, prix: String(item.prix), emoji: item.emoji, categorieId: item.categorieId, variacoes: item.variacoes ?? [] }); setShowModal(true) }}
               style={{ background: 'var(--surface)', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>✏️</button>
             <button onClick={() => excluirItem({ itemId: item._id }).then(() => showToast('🗑️ Item removido'))}
               style={{ background: 'var(--surface)', border: 'none', borderRadius: 8, width: 32, height: 32, cursor: 'pointer', fontSize: 16 }}>🗑️</button>
@@ -258,6 +258,46 @@ function CardapioTab({ items, categorias, kiosque, showToast }) {
               </div>
             </div>
             <div className="form-group"><label className="form-label">Descrição</label><textarea className="form-input" value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={2} style={{ resize: 'none' }} placeholder="Descreva o prato..." /></div>
+
+            {/* Variações */}
+            <div className="form-group">
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <label className="form-label" style={{ margin: 0 }}>Variações (opcional)</label>
+                <button onClick={() => setForm(f => ({ ...f, variacoes: [...f.variacoes, { nom: '', prix: 0 }] }))} style={{ background: 'var(--ocean)', color: 'white', border: 'none', borderRadius: 8, padding: '4px 10px', fontSize: 12, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+                  + Adicionar
+                </button>
+              </div>
+              {form.variacoes.length === 0 && (
+                <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>Ex: Porção inteira / Meia porção com preços diferentes</p>
+              )}
+              {form.variacoes.map((v, i) => (
+                <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                  <input
+                    className="form-input"
+                    value={v.nom}
+                    onChange={e => setForm(f => ({ ...f, variacoes: f.variacoes.map((vv, ii) => ii === i ? { ...vv, nom: e.target.value } : vv) }))}
+                    placeholder="Ex: Porção inteira"
+                    style={{ flex: 2, margin: 0 }}
+                  />
+                  <input
+                    className="form-input"
+                    type="number"
+                    value={v.prix || ''}
+                    onChange={e => setForm(f => ({ ...f, variacoes: f.variacoes.map((vv, ii) => ii === i ? { ...vv, prix: parseFloat(e.target.value) || 0 } : vv) }))}
+                    placeholder="R$"
+                    step="0.50"
+                    style={{ flex: 1, margin: 0 }}
+                  />
+                  <button onClick={() => setForm(f => ({ ...f, variacoes: f.variacoes.filter((_, ii) => ii !== i) }))} style={{ background: '#FEE2E2', border: 'none', borderRadius: 8, width: 32, height: 36, cursor: 'pointer', fontSize: 16, color: '#DC2626', flexShrink: 0 }}>🗑️</button>
+                </div>
+              ))}
+              {form.variacoes.length > 0 && (
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                  💡 Com variações, le prix de base sert de référence — le client choisira obligatoirement une variação.
+                </p>
+              )}
+            </div>
+
             <button className="btn-primary" onClick={saveItem}>✅ Salvar</button>
           </div>
         </div>

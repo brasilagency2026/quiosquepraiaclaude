@@ -22,13 +22,14 @@ export default function Carrinho({ cart, total, onBack, onCheckout, onChangeQty 
             <div style={{ width: 52, height: 52, background: 'var(--surface)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>{item.emoji}</div>
             <div style={{ flex: 1 }}>
               <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>{item.nom}</div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{fmt(item.prix)} × {item.qty} = <strong>{fmt(item.prix * item.qty)}</strong></div>
+              {item.variacaoNom && <div style={{ fontSize: 12, color: 'var(--ocean)', fontWeight: 600, marginBottom: 2 }}>📐 {item.variacaoNom}</div>}
+              <div style={{ fontSize: 13, color: 'var(--text-secondary)' }}>{fmt(item.prixEffectif ?? item.prix)} × {item.qty} = <strong>{fmt((item.prixEffectif ?? item.prix) * item.qty)}</strong></div>
               {item.obs && <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 2 }}>📝 {item.obs}</div>}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface)', borderRadius: 50, padding: 4 }}>
-              <button onClick={() => onChangeQty(item._id, item.obs, -1)} style={{ width: 32, height: 32, border: 'none', borderRadius: '50%', background: 'white', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ocean)' }}>−</button>
+              <button onClick={() => onChangeQty(item._id, item.obs, -1, item.variacaoNom)} style={{ width: 32, height: 32, border: 'none', borderRadius: '50%', background: 'white', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ocean)' }}>−</button>
               <span style={{ fontFamily: "'Baloo 2',cursive", fontWeight: 700, fontSize: 16, color: 'var(--ocean)', minWidth: 20, textAlign: 'center' }}>{item.qty}</span>
-              <button onClick={() => onChangeQty(item._id, item.obs, 1)} style={{ width: 32, height: 32, border: 'none', borderRadius: '50%', background: 'white', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ocean)' }}>+</button>
+              <button onClick={() => onChangeQty(item._id, item.obs, 1, item.variacaoNom)} style={{ width: 32, height: 32, border: 'none', borderRadius: '50%', background: 'white', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ocean)' }}>+</button>
             </div>
           </div>
         ))}
