@@ -191,13 +191,16 @@ function CardapioTab({ items, categorias, kiosque, showToast }) {
   const toggleDisp = useMutation(api.cardapio.toggleDisponivel)
 
   async function saveItem() {
-    if (!form.nom || !form.prix || !form.categorieId) { showToast('⚠️ Preencha todos os campos'); return }
+    const temVariacoes = form.variacoes && form.variacoes.length > 0
+    if (!form.nom || !form.categorieId) { showToast('⚠️ Preencha nome e categoria'); return }
+    if (!temVariacoes && !form.prix) { showToast('⚠️ Informe o preço ou adicione variações'); return }
+    if (temVariacoes && form.variacoes.some(v => !v.nom || !v.prix)) { showToast('⚠️ Preencha nome e preço de cada variação'); return }
     try {
       if (editing) {
-        await editarItem({ itemId: editing._id, nom: form.nom, description: form.description, prix: parseFloat(form.prix || '0'), emoji: form.emoji, categorieId: form.categorieId, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
+        await editarItem({ itemId: editing._id, nom: form.nom, description: form.description, prix: parseFloat(form.prix) || (form.variacoes[0]?.prix ?? 0), emoji: form.emoji, categorieId: form.categorieId, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
         showToast('✅ Item atualizado!')
       } else {
-        await criarItem({ categorieId: form.categorieId, nom: form.nom, description: form.description, prix: parseFloat(form.prix || '0'), emoji: form.emoji, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
+        await criarItem({ categorieId: form.categorieId, nom: form.nom, description: form.description, prix: parseFloat(form.prix) || (form.variacoes[0]?.prix ?? 0), emoji: form.emoji, variacoes: form.variacoes.length > 0 ? form.variacoes : undefined })
         showToast('✅ Item adicionado!')
       }
       setShowModal(false); setEditing(null); setForm({ nom: '', description: '', prix: '', emoji: '🍽️', categorieId: '', variacoes: [] })
