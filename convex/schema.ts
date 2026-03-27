@@ -65,6 +65,7 @@ export default defineSchema({
       qty: v.number(),
       prixUnit: v.number(),
       annule: v.boolean(),
+      obs: v.optional(v.string()),
     })),
     total: v.number(),
     totalRembourse: v.number(),

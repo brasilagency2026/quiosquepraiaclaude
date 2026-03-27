@@ -52,6 +52,7 @@ export default function Menu() {
           emoji: i.emoji,
           qty: i.qty,
           prixUnit: i.prix,
+          obs: i.obs || undefined,
         })),
         total,
         metodoPagamento: method,

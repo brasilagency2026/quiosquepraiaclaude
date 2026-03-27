@@ -71,7 +71,10 @@ export default function Garcom() {
                 </div>
                 <div style={{ padding: '14px 16px' }}>
                   {pedido.items.filter(i => !i.annule).map((item, i) => (
-                    <div key={i} style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>• {item.qty}× {item.emoji} {item.nom}</div>
+                    <div key={i} style={{ marginBottom: 6 }}>
+                      <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>• {item.qty}× {item.emoji} {item.nom}</div>
+                      {item.obs && <div style={{ fontSize: 12, color: '#F59E0B', marginLeft: 16, marginTop: 1 }}>📝 {item.obs}</div>}
+                    </div>
                   ))}
                   <div style={{ background: '#FFF9E6', border: '1px solid #FDE68A', borderRadius: 12, padding: 12, marginTop: 12 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -115,7 +118,10 @@ export default function Garcom() {
                 </div>
                 <div style={{ padding: '14px 16px' }}>
                   {pedido.items.filter(i => !i.annule).map((item, i) => (
-                    <div key={i} style={{ fontSize: 14, color: 'var(--text-secondary)', marginBottom: 4 }}>• {item.qty}× {item.emoji} {item.nom}</div>
+                    <div key={i} style={{ marginBottom: 6 }}>
+                      <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>• {item.qty}× {item.emoji} {item.nom}</div>
+                      {item.obs && <div style={{ fontSize: 12, color: '#F59E0B', marginLeft: 16, marginTop: 1 }}>📝 {item.obs}</div>}
+                    </div>
                   ))}
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, paddingTop: 12, borderTop: '1px solid #E2E8F0' }}>
                     <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Total:</span>

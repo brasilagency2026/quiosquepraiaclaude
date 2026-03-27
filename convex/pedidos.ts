@@ -98,6 +98,7 @@ export const criar = mutation({
         emoji: v.string(),
         qty: v.number(),
         prixUnit: v.number(),
+        obs: v.optional(v.string()),
       })
     ),
     total: v.number(),

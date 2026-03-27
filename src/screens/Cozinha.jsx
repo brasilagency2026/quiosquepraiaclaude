@@ -127,7 +127,12 @@ export default function Cozinha() {
                 {pedido.items.filter(i => !i.annule).map((item, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid #374151' }}>
                     <div style={{ background: '#00B4D8', color: '#0D2137', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Baloo 2',cursive", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{item.qty}</div>
-                    <div style={{ fontSize: 16, color: '#F3F4F6' }}>{item.emoji} {item.nom}</div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 16, color: '#F3F4F6' }}>{item.emoji} {item.nom}</div>
+                      {item.obs && (
+                        <div style={{ fontSize: 12, color: '#F59E0B', marginTop: 2 }}>📝 {item.obs}</div>
+                      )}
+                    </div>
                   </div>
                 ))}
                 {pedido.observacao && (
