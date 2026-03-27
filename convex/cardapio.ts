@@ -104,6 +104,8 @@ export const criarItem = mutation({
     description: v.string(),
     prix: v.number(),
     emoji: v.string(),
+    sku: v.optional(v.string()),
+    variacoes: v.optional(v.array(v.object({ nom: v.string(), prix: v.number() }))),
   },
   handler: async (ctx, args) => {
     const { kiosque } = await getKiosqueDoGestor(ctx);
@@ -124,12 +126,13 @@ export const editarItem = mutation({
     emoji: v.optional(v.string()),
     categorieId: v.optional(v.id("categories")),
     disponible: v.optional(v.boolean()),
+    sku: v.optional(v.string()),
+    variacoes: v.optional(v.array(v.object({ nom: v.string(), prix: v.number() }))),
   },
   handler: async (ctx, { itemId, ...updates }) => {
     const { kiosque } = await getKiosqueDoGestor(ctx);
     const item = await ctx.db.get(itemId);
     if (!item || item.kiosqueId !== kiosque._id) throw new Error("Item não encontrado");
-    // Remove undefined values
     const patch = Object.fromEntries(
       Object.entries(updates).filter(([, v]) => v !== undefined)
     );
