@@ -43,6 +43,11 @@ export default defineSchema({
     prix: v.number(),
     emoji: v.string(),
     disponible: v.boolean(),
+    sku: v.optional(v.string()),
+    variacoes: v.optional(v.array(v.object({
+      nom: v.string(),
+      prix: v.number(),
+    }))),
   })
     .index("by_kiosque", ["kiosqueId"])
     .index("by_categorie", ["categorieId"]),
@@ -66,6 +71,8 @@ export default defineSchema({
       prixUnit: v.number(),
       annule: v.boolean(),
       obs: v.optional(v.string()),
+      sku: v.optional(v.string()),
+      variacao: v.optional(v.string()),
     })),
     total: v.number(),
     totalRembourse: v.number(),
