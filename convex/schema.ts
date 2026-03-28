@@ -14,12 +14,17 @@ export default defineSchema({
     // Config paiement — clés secrètes chiffrées AES-256
     pagamento: v.optional(v.object({
       provider: v.union(v.literal("mercadopago"), v.literal("stripe")),
-      // MercadoPago
+      // MercadoPago OAuth
       mp_public_key: v.optional(v.string()),
-      mp_access_token_enc: v.optional(v.string()),   // chiffré
+      mp_access_token_enc: v.optional(v.string()),
+      mp_refresh_token_enc: v.optional(v.string()),
+      mp_user_id: v.optional(v.string()),
+      mp_oauth: v.optional(v.boolean()),  // true = connecté via OAuth
       // Stripe
       stripe_publishable_key: v.optional(v.string()),
-      stripe_secret_key_enc: v.optional(v.string()), // chiffré
+      stripe_secret_key_enc: v.optional(v.string()),
+      stripe_account_id: v.optional(v.string()),
+      stripe_oauth: v.optional(v.boolean()),
       // Status
       configurado: v.boolean(),
       testado_em: v.optional(v.number()),

@@ -18,17 +18,36 @@ export default function App() {
     <ToastProvider>
       <Toast />
       <Routes>
+        {/* Cliente — via QR code */}
         <Route path="/" element={<Navigate to="/scan" />} />
         <Route path="/scan" element={<ScanQR />} />
         <Route path="/:slug/:parasol" element={<Menu />} />
-        <Route path="/menu/:slug" element={<MenuVitrine />} />
+
+        {/* Staff — login PIN */}
         <Route path="/login/:slug" element={<LoginPIN />} />
+
+        {/* Staff — écrans protégés */}
         <Route path="/cozinha/:slug" element={<Cozinha />} />
         <Route path="/garcom/:slug" element={<Garcom />} />
+
+        {/* Cardápio vitrine */}
+        <Route path="/menu/:slug" element={<MenuVitrine />} />
+
+        {/* Staff */}
         <Route path="/caixa/:slug" element={<Caixa />} />
+
+        {/* Gestor */}
         <Route path="/admin/:slug/login" element={<LoginGestor />} />
         <Route path="/admin/:slug" element={<Admin />} />
+
+        {/* Super Admin */}
         <Route path="/superadmin" element={<SuperAdmin />} />
+
+        {/* OAuth redirects — MP callback redirige vers admin */}
+        <Route path="/oauth/mp/success" element={<Navigate to="/scan" />} />
+        <Route path="/oauth/mp/error" element={<Navigate to="/scan" />} />
+
+        {/* Fallback */}
         <Route path="*" element={<Navigate to="/scan" />} />
       </Routes>
     </ToastProvider>

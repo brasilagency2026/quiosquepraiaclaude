@@ -1,8 +1,68 @@
 import { httpRouter } from "convex/server";
 import { httpAction } from "./_generated/server";
-import { api } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 
 const http = httpRouter();
+
+// ── MercadoPago OAuth callback ────────────────────────
+http.route({
+  path: "/oauth/mp/callback",
+  method: "GET",
+  handler: httpAction(async (ctx, request) => {
+    const url = new URL(request.url);
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state"); // kiosqueId encodé en base64
+    const error = url.searchParams.get("error");
+
+    const frontendUrl = process.env.FRONTEND_URL ?? "https://pay.quiosquepraia.com";
+
+    if (error || !code || !state) {
+      return Response.redirect(`${frontendUrl}/oauth/mp/error?msg=${error ?? "missing_code"}`);
+    }
+
+    try {
+      const kiosqueId = atob(state);
+
+      // Échanger le code contre un access token
+      const appId = process.env.MP_APP_ID;
+      const clientSecret = process.env.MP_CLIENT_SECRET;
+
+      const tokenRes = await fetch("https://api.mercadopago.com/oauth/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          client_id: appId,
+          client_secret: clientSecret,
+          code,
+          grant_type: "authorization_code",
+          redirect_uri: `${process.env.CONVEX_SITE_URL}/oauth/mp/callback`,
+        }),
+      });
+
+      if (!tokenRes.ok) {
+        const err = await tokenRes.text();
+        console.error("MP OAuth token error:", err);
+        return Response.redirect(`${frontendUrl}/oauth/mp/error?msg=token_exchange_failed`);
+      }
+
+      const tokenData = await tokenRes.json();
+      // tokenData: { access_token, token_type, expires_in, scope, user_id, refresh_token, public_key }
+
+      await ctx.runAction(internal.pagamentos.saveOAuthMP, {
+        kiosqueId,
+        accessToken: tokenData.access_token,
+        refreshToken: tokenData.refresh_token ?? "",
+        publicKey: tokenData.public_key ?? "",
+        userId: String(tokenData.user_id),
+      });
+
+      return Response.redirect(`${frontendUrl}/oauth/mp/success`);
+    } catch (e) {
+      console.error("MP OAuth callback error:", e);
+      return Response.redirect(`${frontendUrl}/oauth/mp/error?msg=internal_error`);
+    }
+  }),
+});
 
 // ── MercadoPago webhook ───────────────────────────────
 // Appelé par MercadoPago quand un paiement est approuvé/refusé

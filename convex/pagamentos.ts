@@ -366,3 +366,91 @@ export const marcarTestado = internalMutation({
     });
   },
 });
+
+// ── OAuth MercadoPago ─────────────────────────────────
+
+// Génère l'URL d'autorisation MP pour le gestionnaire
+export const getMPOAuthUrl = query({
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Não autenticado");
+
+    const usuario = await ctx.db
+      .query("usuarios")
+      .withIndex("by_clerk", (q) => q.eq("clerkUserId", identity.subject))
+      .first();
+    if (!usuario) throw new Error("Usuário não encontrado");
+
+    const kiosque = await ctx.db.get(usuario.kiosqueId);
+    if (!kiosque) throw new Error("Quiosque não encontrado");
+
+    const appId = process.env.MP_APP_ID;
+    const siteUrl = process.env.CONVEX_SITE_URL;
+    // state = kiosqueId encodé base64 pour retrouver le kiosque au retour
+    const state = btoa(kiosque._id);
+    const redirectUri = encodeURIComponent(`${siteUrl}/oauth/mp/callback`);
+
+    return {
+      url: `https://auth.mercadopago.com.br/authorization?client_id=${appId}&response_type=code&platform_id=mp&state=${state}&redirect_uri=${redirectUri}`,
+      kiosqueId: kiosque._id,
+    };
+  },
+});
+
+// Sauvegarde les tokens OAuth après callback (action interne)
+export const saveOAuthMP = internalAction({
+  args: {
+    kiosqueId: v.string(),
+    accessToken: v.string(),
+    refreshToken: v.string(),
+    publicKey: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const accessEnc = await encrypt(args.accessToken);
+    const refreshEnc = await encrypt(args.refreshToken);
+
+    await ctx.runMutation(internal.pagamentos.saveOAuthMPMutation, {
+      kiosqueId: args.kiosqueId as any,
+      accessTokenEnc: accessEnc,
+      refreshTokenEnc: refreshEnc,
+      publicKey: args.publicKey,
+      userId: args.userId,
+    });
+  },
+});
+
+export const saveOAuthMPMutation = internalMutation({
+  args: {
+    kiosqueId: v.id("kiosques"),
+    accessTokenEnc: v.string(),
+    refreshTokenEnc: v.string(),
+    publicKey: v.string(),
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const kiosque = await ctx.db.get(args.kiosqueId);
+    if (!kiosque) throw new Error("Quiosque não encontrado");
+
+    await ctx.db.patch(args.kiosqueId, {
+      pagamento: {
+        provider: "mercadopago",
+        mp_public_key: args.publicKey,
+        mp_access_token_enc: args.accessTokenEnc,
+        mp_refresh_token_enc: args.refreshTokenEnc,
+        mp_user_id: args.userId,
+        mp_oauth: true,
+        configurado: true,
+        testado_em: Date.now(),
+      },
+    });
+  },
+});
+
+// Déconnecter OAuth MP
+export const desconectarOAuthMP = mutation({
+  handler: async (ctx) => {
+    const { kiosque } = await getKiosqueDoGestor(ctx);
+    await ctx.db.patch(kiosque._id, { pagamento: undefined });
+  },
+});
