@@ -99,6 +99,8 @@ export const criar = mutation({
         qty: v.number(),
         prixUnit: v.number(),
         obs: v.optional(v.string()),
+        sku: v.optional(v.string()),
+        variacao: v.optional(v.string()),
       })
     ),
     total: v.number(),
@@ -267,5 +269,36 @@ export const getPedidosParasol = query({
     return todos.filter(
       (p) => p.parasolNumero === parasolNumero && p.criadoEm >= corteLiberacao
     );
+  },
+});
+
+// ── Stats par SKU (produits les mieux vendus) ───────
+export const getEstatisticasSKU = query({
+  args: { kiosqueId: v.id("kiosques") },
+  handler: async (ctx, { kiosqueId }) => {
+    const hoje = new Date().setHours(0, 0, 0, 0);
+    const pedidos = await ctx.db
+      .query("pedidos")
+      .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
+      .collect();
+
+    const pedidosHoje = pedidos.filter(
+      (p) => p.criadoEm >= hoje && p.statut !== "cancelado"
+    );
+
+    const stats: Record<string, { nom: string; sku: string; qty: number; valor: number }> = {};
+
+    for (const pedido of pedidosHoje) {
+      for (const item of pedido.items) {
+        if (item.annule) continue;
+        const key = item.sku || item.itemId;
+        const label = item.variacao ? `${item.nom} — ${item.variacao}` : item.nom;
+        if (!stats[key]) stats[key] = { nom: label, sku: item.sku || "", qty: 0, valor: 0 };
+        stats[key].qty += item.qty;
+        stats[key].valor += item.qty * item.prixUnit;
+      }
+    }
+
+    return Object.values(stats).sort((a, b) => b.qty - a.qty);
   },
 });

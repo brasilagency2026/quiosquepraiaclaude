@@ -129,6 +129,9 @@ export default function Cozinha() {
                     <div style={{ background: '#00B4D8', color: '#0D2137', width: 28, height: 28, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Baloo 2',cursive", fontWeight: 700, fontSize: 14, flexShrink: 0 }}>{item.qty}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 16, color: '#F3F4F6' }}>{item.emoji} {item.nom}</div>
+                      {item.sku && (
+                        <div style={{ fontSize: 11, color: '#9CA3AF', marginTop: 1, fontFamily: 'monospace' }}>#{item.sku}</div>
+                      )}
                       {item.obs && (
                         <div style={{ fontSize: 12, color: '#F59E0B', marginTop: 2 }}>📝 {item.obs}</div>
                       )}

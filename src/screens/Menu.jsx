@@ -53,6 +53,7 @@ export default function Menu() {
           qty: i.qty,
           prixUnit: i.prixEffectif ?? i.prix,
           obs: i.obs || undefined,
+          sku: i.sku || undefined,
         })),
         total,
         metodoPagamento: method,
