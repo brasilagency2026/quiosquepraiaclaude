@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useQuery } from 'convex/react'
+import { useQuery, useAction } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
 
@@ -14,13 +14,14 @@ const PROVIDER_METHODS = {
   stripe: 'Cartão de Crédito · Débito',
 }
 
-export default function Pagamento({ total, cart, onBack, onConfirm, slug }) {
+export default function Pagamento({ total, cart, onBack, onConfirm, slug, pedidoId: pedidoIdProp, onPreCreate }) {
   const [metodo, setMetodo] = useState(null) // 'digital' | 'dinheiro'
   const [loading, setLoading] = useState(false)
   const [dinheiroOferecido, setDinheiroOferecido] = useState('')
   const { showToast } = useToast()
 
   const configPagamento = useQuery(api.pagamentos.getConfigPagamento, slug ? { kiosqueSlug: slug } : 'skip')
+  const criarIntentPagamento = useAction(api.pagamentos.criarIntentPagamento)
 
   const valorOferecido = parseFloat(dinheiroOferecido) || 0
   const troco = valorOferecido >= total ? valorOferecido - total : null
@@ -38,11 +39,28 @@ export default function Pagamento({ total, cart, onBack, onConfirm, slug }) {
       return
     }
     if (metodo === 'digital') {
+      if (!pedidoId) {
+        showToast('⚠️ Confirme o pedido antes de pagar'); return
+      }
       setLoading(true)
-      showToast('⏳ Processando pagamento...')
-      await new Promise(r => setTimeout(r, 1800))
-      setLoading(false)
-      onConfirm(provider ?? 'digital')
+      try {
+        const result = await criarIntentPagamento({
+          kiosqueSlug: slug,
+          montant: total,
+          pedidoId: pedidoId,
+          metodo: 'pix',
+          descricao: `Pedido Quiosque Praia - ${cart.length} iten(s)`,
+        })
+        if (result?.initPoint) {
+          window.location.href = result.initPoint
+        } else {
+          showToast('❌ Erro ao criar pagamento MP')
+          setLoading(false)
+        }
+      } catch (e) {
+        showToast('❌ ' + (e.message ?? 'Erro ao processar pagamento'))
+        setLoading(false)
+      }
       return
     }
     showToast('⚠️ Escolha uma forma de pagamento')

@@ -91,8 +91,34 @@ export default function Menu() {
     <Pagamento
       total={total} cart={cart}
       slug={slug}
-      onBack={() => setScreen('cart')}
+      pedidoId={pedidoId}
+      onBack={() => { setPedidoId(null); setPedidoNumero(null); setScreen('cart') }}
       onConfirm={handleConfirmPayment}
+      onPreCreate={async () => {
+        // Pour paiement digital: crée le pedido avant la redirection MP
+        if (pedidoId) return pedidoId
+        const result = await criarPedido({
+          kiosqueId: kiosque._id,
+          parasolNumero: parasol,
+          items: cart.map(i => ({
+            itemId: i._id,
+            nom: i.variacaoNom ? `${i.nom} (${i.variacaoNom})` : i.nom,
+            emoji: i.emoji,
+            qty: i.qty,
+            prixUnit: i.prixEffectif ?? i.prix,
+            obs: i.obs || undefined,
+            sku: i.sku || undefined,
+          })),
+          total,
+          metodoPagamento: 'digital',
+          pagamentoId: 'MP-PENDING-' + Date.now(),
+          dinheiroOferecido: undefined,
+          troco: undefined,
+        })
+        setPedidoId(result.id)
+        setPedidoNumero(result.numero)
+        return result.id
+      }}
     />
   )
   if (screen === 'confirmed') return (
