@@ -39,22 +39,24 @@ export default function Pagamento({ total, cart, onBack, onConfirm, slug, pedido
       return
     }
     if (metodo === 'digital') {
-      if (!resolvedId) {
-        showToast('⚠️ Confirme o pedido antes de pagar'); return
-      }
       setLoading(true)
       try {
+        // Créer le pedido avant la redirection MP
+        const resolvedId = onPreCreate ? await onPreCreate() : pedidoIdProp
+        if (!resolvedId) {
+          showToast('❌ Erro ao criar pedido'); setLoading(false); return
+        }
         const result = await criarIntentPagamento({
           kiosqueSlug: slug,
           montant: total,
           pedidoId: resolvedId,
           metodo: 'pix',
-          descricao: `Pedido Quiosque Praia - ${cart.length} iten(s)`,
+          descricao: `Pedido Quiosque Praia`,
         })
         if (result?.initPoint) {
           window.location.href = result.initPoint
         } else {
-          showToast('❌ Erro ao criar pagamento MP')
+          showToast('❌ Erro ao criar pagamento. Tente novamente.')
           setLoading(false)
         }
       } catch (e) {
