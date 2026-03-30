@@ -39,7 +39,7 @@ export default function Pagamento({ total, cart, onBack, onConfirm, slug, pedido
       return
     }
     if (metodo === 'digital') {
-      if (!pedidoId) {
+      if (!resolvedId) {
         showToast('⚠️ Confirme o pedido antes de pagar'); return
       }
       setLoading(true)
@@ -47,7 +47,7 @@ export default function Pagamento({ total, cart, onBack, onConfirm, slug, pedido
         const result = await criarIntentPagamento({
           kiosqueSlug: slug,
           montant: total,
-          pedidoId: pedidoId,
+          pedidoId: resolvedId,
           metodo: 'pix',
           descricao: `Pedido Quiosque Praia - ${cart.length} iten(s)`,
         })
