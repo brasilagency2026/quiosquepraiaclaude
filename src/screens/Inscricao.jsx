@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSignUp, useUser } from '@clerk/clerk-react'
+import { useSignUp, useUser, useClerk } from '@clerk/clerk-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 
@@ -20,7 +20,8 @@ const ESTADOS = [
 export default function Inscricao() {
   const navigate = useNavigate()
   const { signUp, setActive, isLoaded } = useSignUp()
-  const { isSignedIn } = useUser()
+  const { isSignedIn, user } = useUser()
+  const { signOut } = useClerk()
   const solicitarInscricao = useMutation(api.inscricoes.solicitar)
 
   // Etapas: 'quiosque' | 'conta' | 'verificacao' | 'sucesso'
@@ -34,6 +35,33 @@ export default function Inscricao() {
     email: '', senha: '', confirmarSenha: '',
   })
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErro('') }
+
+  // Si déjà connecté avec un autre compte — proposer de se déconnecter
+  if (isSignedIn && etapa === 'quiosque') {
+    return (
+      <div style={s.page}>
+        <WaveBg />
+        <div style={s.card}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 44, marginBottom: 16 }}>👤</div>
+            <h3 style={{ fontFamily: "'Baloo 2',cursive", fontSize: 20, fontWeight: 700, color: '#F5E6C8', marginBottom: 8 }}>
+              Você já está conectado
+            </h3>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', fontFamily: 'Inter,sans-serif', marginBottom: 24, lineHeight: 1.6 }}>
+              Email: <strong style={{ color: '#00B4D8' }}>{user?.primaryEmailAddress?.emailAddress}</strong><br />
+              Para criar uma nova conta, saia primeiro.
+            </p>
+            <button onClick={() => signOut()} style={{ ...s.btnPrimary, marginBottom: 10 }}>
+              🚪 Sair e criar nova conta
+            </button>
+            <button onClick={() => window.history.back()} style={s.btnLink}>
+              ← Voltar
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   // ── Étape 1 → 2 ──────────────────────────────────
   function avancarParaConta() {
