@@ -150,4 +150,20 @@ export default defineSchema({
     .index("by_kiosque", ["kiosqueId"])
     .index("by_kiosque_lue", ["kiosqueId", "lue"]),
 
+  inscricoes: defineTable({
+    nomGestor: v.string(),
+    nomKiosque: v.string(),
+    ville: v.string(),
+    etat: v.string(),
+    email: v.string(),
+    clerkUserId: v.optional(v.string()),
+    statut: v.union(v.literal("pendente"), v.literal("aprovado"), v.literal("rejeitado")),
+    slug: v.optional(v.string()),
+    kiosqueId: v.optional(v.id("kiosques")),
+    criadoEm: v.number(),
+    processadoEm: v.optional(v.number()),
+  })
+    .index("by_statut", ["statut"])
+    .index("by_email", ["email"]),
+
 });

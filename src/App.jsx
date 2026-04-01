@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
-import ScanQR from './screens/ScanQR'
+import Landing from './screens/Landing'
 import Menu from './screens/Menu'
 import MenuVitrine from './screens/MenuVitrine'
 import Cozinha from './screens/Cozinha'
@@ -10,6 +10,7 @@ import Admin from './screens/Admin'
 import SuperAdmin from './screens/SuperAdmin'
 import LoginPIN from './screens/LoginPIN'
 import LoginGestor from './screens/LoginGestor'
+import Inscricao from './screens/Inscricao'
 import Toast from './components/Toast'
 import { ToastProvider } from './context/ToastContext'
 
@@ -20,7 +21,7 @@ export default function App() {
       <Routes>
         {/* Cliente — via QR code */}
         <Route path="/" element={<Navigate to="/scan" />} />
-        <Route path="/scan" element={<ScanQR />} />
+        <Route path="/scan" element={<Landing />} />
         <Route path="/:slug/:parasol" element={<Menu />} />
 
         {/* Staff — login PIN */}
@@ -39,6 +40,9 @@ export default function App() {
         {/* Gestor */}
         <Route path="/admin/:slug/login" element={<LoginGestor />} />
         <Route path="/admin/:slug" element={<Admin />} />
+
+        {/* Inscrição */}
+        <Route path="/inscricao" element={<Inscricao />} />
 
         {/* Super Admin */}
         <Route path="/superadmin" element={<SuperAdmin />} />

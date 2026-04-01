@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation } from 'convex/react'
-import { useUser, SignOutButton, SignInButton } from '@clerk/clerk-react'
+import { useUser, SignOutButton } from '@clerk/clerk-react'
 import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
 
@@ -12,26 +12,16 @@ export default function SuperAdmin() {
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ slug: '', nom: '', ville: '', etat: '', emailGestor: '', nomGestor: '' })
 
-  const kiosques = useQuery(api.kiosques.listarTodos, user ? undefined : 'skip')
+  const kiosques = useQuery(api.kiosques.listarTodos)
   const criar = useMutation(api.kiosques.criar)
   const suspender = useMutation(api.kiosques.suspender)
   const reativar = useMutation(api.kiosques.reativar)
+  const inscricoes = useQuery(api.inscricoes.listar, {})
+  const aprovar = useMutation(api.inscricoes.aprovarMutation)
+  const rejeitar = useMutation(api.inscricoes.rejeitar)
+  const pendentes = inscricoes?.filter(i => i.statut === 'pendente') ?? []
 
   if (!isLoaded) return <Loading />
-
-  if (!user) return (
-    <div style={{ minHeight: '100vh', background: '#0D2137', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 24 }}>
-      <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 32, fontWeight: 800, color: '#F5E6C8', textAlign: 'center' }}>
-        Praia<span style={{ color: '#00B4D8' }}>App</span>
-        <div style={{ fontSize: 14, background: '#FF6B6B', color: 'white', padding: '4px 14px', borderRadius: 8, marginTop: 8, fontFamily: 'Inter,sans-serif', fontWeight: 700, display: 'inline-block' }}>SUPER ADMIN</div>
-      </div>
-      <SignInButton mode="modal">
-        <button style={{ background: '#00B4D8', color: '#0D2137', border: 'none', borderRadius: 14, padding: '16px 36px', fontSize: 17, fontWeight: 700, cursor: 'pointer', fontFamily: "'Baloo 2',cursive", boxShadow: '0 4px 20px rgba(0,180,216,0.4)' }}>
-          🔐 Entrar
-        </button>
-      </SignInButton>
-    </div>
-  )
 
   function autoSlug() {
     const s = `${form.nom}-${form.ville}-${form.etat}`
@@ -79,6 +69,7 @@ export default function SuperAdmin() {
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8, padding: '16px 16px 0' }}>
         {[
+          { label: 'Inscrições Pendentes', val: pendentes.length, color: pendentes.length > 0 ? '#F59E0B' : '#06D6A0' },
           { label: 'Total Quiosques', val: kiosques?.length ?? 0, color: '#00B4D8' },
           { label: 'Ativos', val: kiosques?.filter(k => k.actif).length ?? 0, color: '#06D6A0' },
           { label: 'Inativos', val: kiosques?.filter(k => !k.actif).length ?? 0, color: '#FF6B6B' },
@@ -101,6 +92,64 @@ export default function SuperAdmin() {
         }}>
           + Criar Novo Quiosque
         </button>
+
+        {/* Inscrições pendentes */}
+        {pendentes.length > 0 && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+              <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#F5E6C8' }}>
+                Inscrições Pendentes
+              </p>
+              <span style={{ background: '#F59E0B', color: '#0D2137', borderRadius: 20, padding: '2px 10px', fontSize: 12, fontWeight: 700 }}>
+                {pendentes.length}
+              </span>
+            </div>
+            {pendentes.map(insc => (
+              <div key={insc._id} style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 16, padding: '16px 20px', marginBottom: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
+                  <div>
+                    <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: '#F5E6C8' }}>{insc.nomGestor}</div>
+                    <div style={{ fontSize: 14, color: '#00B4D8', fontWeight: 600 }}>🏖️ {insc.nomKiosque}</div>
+                    <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{insc.ville} · {insc.etat}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{insc.email}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
+                      {new Date(insc.criadoEm).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <button onClick={() => aprovar({ inscricaoId: insc._id }).then(() => showToast('✅ Quiosque criado!'))} style={{ background: '#06D6A0', color: '#0D2137', border: 'none', borderRadius: 10, padding: '10px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: "'Baloo 2',cursive" }}>
+                    ✅ Aprovar
+                  </button>
+                  <button onClick={() => rejeitar({ inscricaoId: insc._id }).then(() => showToast('❌ Rejeitado'))} style={{ background: 'rgba(255,107,107,0.15)', border: '1px solid rgba(255,107,107,0.3)', color: '#FF6B6B', borderRadius: 10, padding: '10px', fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+                    ✕ Rejeitar
+                  </button>
+                </div>
+              </div>
+            ))}
+            <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '4px 0 20px' }} />
+          </>
+        )}
+
+        {/* Toutes les inscriptions (historique) */}
+        {inscricoes && inscricoes.filter(i => i.statut !== 'pendente').length > 0 && (
+          <details style={{ marginBottom: 20 }}>
+            <summary style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginBottom: 10 }}>
+              Histórico de inscrições ({inscricoes.filter(i => i.statut !== 'pendente').length})
+            </summary>
+            {inscricoes.filter(i => i.statut !== 'pendente').map(insc => (
+              <div key={insc._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 600, color: '#F5E6C8' }}>{insc.nomGestor} · {insc.nomKiosque}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{insc.email} · {insc.ville}/{insc.etat}</div>
+                </div>
+                <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 8, background: insc.statut === 'aprovado' ? 'rgba(6,214,160,0.15)' : 'rgba(255,107,107,0.15)', color: insc.statut === 'aprovado' ? '#06D6A0' : '#FF6B6B' }}>
+                  {insc.statut === 'aprovado' ? '✅ Aprovado' : '✕ Rejeitado'}
+                </span>
+              </div>
+            ))}
+          </details>
+        )}
 
         <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#F5E6C8', marginBottom: 14 }}>
           Todos os Quiosques
@@ -203,7 +252,7 @@ export default function SuperAdmin() {
                 placeholder="brisa-do-mar-guaruja-sp"
                 style={{ fontFamily: 'monospace', fontSize: 13 }} />
               <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
-                URL: pay.quiosquepraia.com/{form.slug || '...'}
+                URL: praiapp.com.br/{form.slug || '...'}
               </p>
             </div>
 
