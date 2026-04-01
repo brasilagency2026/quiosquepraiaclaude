@@ -13,6 +13,7 @@ import type * as cardapio from "../cardapio.js";
 import type * as crons from "../crons.js";
 import type * as encryption from "../encryption.js";
 import type * as http from "../http.js";
+import type * as inscricoes from "../inscricoes.js";
 import type * as kiosques from "../kiosques.js";
 import type * as notifications from "../notifications.js";
 import type * as pagamentos from "../pagamentos.js";
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   encryption: typeof encryption;
   http: typeof http;
+  inscricoes: typeof inscricoes;
   kiosques: typeof kiosques;
   notifications: typeof notifications;
   pagamentos: typeof pagamentos;
