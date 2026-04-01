@@ -43,6 +43,7 @@ export default function App() {
 
         {/* Inscrição */}
         <Route path="/inscricao" element={<Inscricao />} />
+        <Route path="/inscricao/sucesso" element={<Inscricao />} />
 
         {/* Super Admin */}
         <Route path="/superadmin" element={<SuperAdmin />} />
