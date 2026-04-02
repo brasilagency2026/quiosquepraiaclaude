@@ -12,11 +12,11 @@ export default function SuperAdmin() {
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ slug: '', nom: '', ville: '', etat: '', emailGestor: '', nomGestor: '' })
 
-  const kiosques = useQuery(api.kiosques.listarTodos)
+  const kiosques = useQuery(api.kiosques.listarTodos, isLoaded && user ? {} : 'skip')
   const criar = useMutation(api.kiosques.criar)
   const suspender = useMutation(api.kiosques.suspender)
   const reativar = useMutation(api.kiosques.reativar)
-  const inscricoes = useQuery(api.inscricoes.listar, {})
+  const inscricoes = useQuery(api.inscricoes.listar, isLoaded && user ? {} : 'skip')
   const aprovar = useAction(api.inscricoes.aprovar)
   const rejeitar = useMutation(api.inscricoes.rejeitar)
   const pendentes = inscricoes?.filter(i => i.statut === 'pendente') ?? []
