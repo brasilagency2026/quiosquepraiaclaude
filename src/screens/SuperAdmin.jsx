@@ -17,7 +17,7 @@ export default function SuperAdmin() {
   const suspender = useMutation(api.kiosques.suspender)
   const reativar = useMutation(api.kiosques.reativar)
   const inscricoes = useQuery(api.inscricoes.listar, {})
-  const aprovar = useMutation(api.inscricoes.aprovarMutation)
+  const aprovar = useAction(api.inscricoes.aprovar)
   const rejeitar = useMutation(api.inscricoes.rejeitar)
   const pendentes = inscricoes?.filter(i => i.statut === 'pendente') ?? []
 

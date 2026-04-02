@@ -65,7 +65,8 @@ export default function Inscricao() {
 
   // ── Étape 1 → 2 ──────────────────────────────────
   function avancarParaConta() {
-    if (!form.nomGestor.trim()) { setErro('Informe seu nome completo'); return }
+    const palavras = form.nomGestor.trim().split(/\s+/)
+    if (palavras.length < 2 || palavras.some(p => p.length < 2)) { setErro('Informe seu nome e sobrenome (ex: João Silva)'); return }
     if (!form.nomKiosque.trim()) { setErro('Informe o nome do quiosque'); return }
     if (!form.ville.trim()) { setErro('Informe a cidade'); return }
     if (!form.etat) { setErro('Selecione o estado'); return }
@@ -202,7 +203,7 @@ export default function Inscricao() {
           <>
             <StepHeader current={1} total={2} titulo="Dados do seu quiosque" />
             <label style={s.label}>Seu nome completo *</label>
-            <input style={s.input} value={form.nomGestor} onChange={e => set('nomGestor', e.target.value)} placeholder="Ex: João Silva" autoFocus />
+            <input style={s.input} value={form.nomGestor} onChange={e => set('nomGestor', e.target.value)} placeholder="Ex: João Silva (nome e sobrenome)" autoFocus />
             <label style={s.label}>Nome do quiosque *</label>
             <input style={s.input} value={form.nomKiosque} onChange={e => set('nomKiosque', e.target.value)} placeholder="Ex: Quiosque da Tereza" />
             <label style={s.label}>Cidade *</label>
