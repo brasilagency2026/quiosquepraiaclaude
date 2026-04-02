@@ -29,6 +29,8 @@ export default function Inscricao() {
   const [loading, setLoading] = useState(false)
   const [erro, setErro] = useState('')
   const [code, setCode] = useState('')
+  const [showSenha, setShowSenha] = useState(false)
+  const [showConfirmar, setShowConfirmar] = useState(false)
 
   const [form, setForm] = useState({
     nomGestor: '', nomKiosque: '', ville: '', etat: '',
