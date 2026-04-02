@@ -137,7 +137,6 @@ export const aprovarMutation = internalMutation({
         role: "gestor" as any,
         actif: true,
         clerkUserId: insc.clerkUserId,
-        criadoEm: Date.now(),
       });
     }
 
