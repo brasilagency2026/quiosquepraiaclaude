@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.2.0",
+    "@clerk/localizations": "^4.3.0",
     "@mercadopago/sdk-react": "^0.0.18",
     "convex": "^1.12.0",
     "react": "^18.3.1",
