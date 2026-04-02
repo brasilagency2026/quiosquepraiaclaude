@@ -234,9 +234,19 @@ export default function Inscricao() {
             <label style={s.label}>Email *</label>
             <input style={s.input} type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="seu@email.com" autoFocus />
             <label style={s.label}>Senha * (mínimo 8 caracteres)</label>
-            <input style={s.input} type="password" value={form.senha} onChange={e => set('senha', e.target.value)} placeholder="Sua senha" />
+            <div style={{ position: 'relative', marginBottom: 14 }}>
+              <input style={{ ...s.input, marginBottom: 0, paddingRight: 48 }} type={showSenha ? 'text' : 'password'} value={form.senha} onChange={e => set('senha', e.target.value)} placeholder="Sua senha" />
+              <button type="button" onClick={() => setShowSenha(v => !v)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'rgba(255,255,255,0.5)', padding: 0, lineHeight: 1 }}>
+                {showSenha ? '🙈' : '👁️'}
+              </button>
+            </div>
             <label style={s.label}>Confirmar senha *</label>
-            <input style={s.input} type="password" value={form.confirmarSenha} onChange={e => set('confirmarSenha', e.target.value)} placeholder="Repita a senha" />
+            <div style={{ position: 'relative', marginBottom: 14 }}>
+              <input style={{ ...s.input, marginBottom: 0, paddingRight: 48 }} type={showConfirmar ? 'text' : 'password'} value={form.confirmarSenha} onChange={e => set('confirmarSenha', e.target.value)} placeholder="Repita a senha" />
+              <button type="button" onClick={() => setShowConfirmar(v => !v)} style={{ position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', fontSize: 18, color: 'rgba(255,255,255,0.5)', padding: 0, lineHeight: 1 }}>
+                {showConfirmar ? '🙈' : '👁️'}
+              </button>
+            </div>
             {erro && <div style={s.erro}>{erro}</div>}
             <button onClick={criarConta} disabled={loading} style={{ ...s.btnPrimary, opacity: loading ? 0.7 : 1 }}>
               {loading ? '⏳ Criando conta...' : '🚀 Criar conta e verificar email'}
