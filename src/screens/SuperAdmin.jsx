@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useAction } from 'convex/react'
+import { useConvexAuth } from 'convex/react'
 import { useUser, SignOutButton } from '@clerk/clerk-react'
 import { api } from '../../convex/_generated/api'
 import { useToast } from '../context/ToastContext'
@@ -8,20 +9,23 @@ import { useToast } from '../context/ToastContext'
 export default function SuperAdmin() {
   const navigate = useNavigate()
   const { user, isLoaded } = useUser()
+  const { isAuthenticated } = useConvexAuth()
   const { showToast } = useToast()
   const [showModal, setShowModal] = useState(false)
   const [form, setForm] = useState({ slug: '', nom: '', ville: '', etat: '', emailGestor: '', nomGestor: '' })
 
-  const kiosques = useQuery(api.kiosques.listarTodos, isLoaded && user ? {} : 'skip')
+  const ready = isLoaded && isAuthenticated
+
+  const kiosques = useQuery(api.kiosques.listarTodos, ready ? {} : 'skip')
   const criar = useMutation(api.kiosques.criar)
   const suspender = useMutation(api.kiosques.suspender)
   const reativar = useMutation(api.kiosques.reativar)
-  const inscricoes = useQuery(api.inscricoes.listar, isLoaded && user ? {} : 'skip')
+  const inscricoes = useQuery(api.inscricoes.listar, ready ? {} : 'skip')
   const aprovar = useAction(api.inscricoes.aprovar)
   const rejeitar = useMutation(api.inscricoes.rejeitar)
   const pendentes = inscricoes?.filter(i => i.statut === 'pendente') ?? []
 
-  if (!isLoaded) return <Loading />
+  if (!isLoaded || !isAuthenticated) return <Loading />
 
   function autoSlug() {
     const s = `${form.nom}-${form.ville}-${form.etat}`
