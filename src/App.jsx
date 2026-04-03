@@ -2,6 +2,9 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import ScanQR from './screens/ScanQR'
 import Landing from './screens/Landing'
+import DemoChoix from './screens/DemoChoix'
+import DemoCliente from './screens/DemoCliente'
+import DemoGestor from './screens/DemoGestor'
 import Menu from './screens/Menu'
 import MenuVitrine from './screens/MenuVitrine'
 import Cozinha from './screens/Cozinha'
@@ -23,6 +26,9 @@ export default function App() {
         {/* Cliente — via QR code */}
         <Route path="/" element={<Landing />} />
         <Route path="/scan" element={<ScanQR />} />
+        <Route path="/demo" element={<DemoChoix />} />
+        <Route path="/demo/cliente" element={<DemoCliente />} />
+        <Route path="/demo/gestor" element={<DemoGestor />} />
         <Route path="/:slug/:parasol" element={<Menu />} />
 
         {/* Staff — login PIN */}

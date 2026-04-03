@@ -109,7 +109,7 @@ export default function Landing() {
           <button onClick={() => navigate('/inscricao')} className="hover-lift" style={{ background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px 36px', fontSize: 17, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 32px rgba(6,214,160,0.35)' }}>
             🚀 Começar grátis
           </button>
-          <button onClick={() => navigate('/scan')} className="hover-lift" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.8)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '16px 36px', fontSize: 17, fontWeight: 600, cursor: 'pointer' }}>
+          <button onClick={() => navigate('/demo')} className="hover-lift" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.8)', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '16px 36px', fontSize: 17, fontWeight: 600, cursor: 'pointer' }}>
             🏖️ Ver demo
           </button>
         </div>
