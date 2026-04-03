@@ -5,6 +5,9 @@ import Landing from './screens/Landing'
 import DemoChoix from './screens/DemoChoix'
 import DemoCliente from './screens/DemoCliente'
 import DemoGestor from './screens/DemoGestor'
+import DemoLoginEquipe from './screens/DemoLoginEquipe'
+import DemoCozinha from './screens/DemoCozinha'
+import DemoGarcom from './screens/DemoGarcom'
 import Menu from './screens/Menu'
 import MenuVitrine from './screens/MenuVitrine'
 import Cozinha from './screens/Cozinha'
@@ -29,6 +32,9 @@ export default function App() {
         <Route path="/demo" element={<DemoChoix />} />
         <Route path="/demo/cliente" element={<DemoCliente />} />
         <Route path="/demo/gestor" element={<DemoGestor />} />
+        <Route path="/demo/equipe" element={<DemoLoginEquipe />} />
+        <Route path="/demo/cozinha" element={<DemoCozinha />} />
+        <Route path="/demo/garcom" element={<DemoGarcom />} />
         <Route path="/:slug/:parasol" element={<Menu />} />
 
         {/* Staff — login PIN */}
