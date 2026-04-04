@@ -302,3 +302,79 @@ export const getById = internalQuery({
     return ctx.db.get(inscricaoId);
   },
 });
+
+// ── Formulaire de contact depuis la landing ───────────
+export const enviarContato = action({
+  args: {
+    email: v.string(),
+  },
+  handler: async (ctx, { email }) => {
+    const resendKey = process.env.RESEND_API_KEY;
+    const frontendUrl = process.env.FRONTEND_URL ?? "https://pay.quiosquepraia.com";
+
+    if (!resendKey) {
+      console.log("RESEND_API_KEY não configurada");
+      return { ok: true };
+    }
+
+    // Email au superadmin
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Quiosque Praia <noreply@quiosquepraia.com>",
+        to: ["glwebagency2@gmail.com"],
+        subject: `📧 Novo interesse: ${email}`,
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px;background:#f8fafc;border-radius:16px">
+            <h2 style="color:#0D2137">📧 Novo contato via landing page</h2>
+            <p style="color:#64748b;font-size:16px;margin:16px 0">
+              Uma pessoa demonstrou interesse no <strong>Quiosque Praia</strong>.
+            </p>
+            <div style="background:white;border-radius:12px;padding:16px;margin:20px 0;border-left:4px solid #00B4D8">
+              <strong>Email:</strong> <a href="mailto:${email}">${email}</a>
+            </div>
+            <a href="${frontendUrl}/superadmin" style="display:inline-block;background:#00B4D8;color:white;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700">
+              Abrir SuperAdmin →
+            </a>
+          </div>
+        `,
+      }),
+    });
+
+    // Email de confirmação ao interessado
+    await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: "Quiosque Praia <noreply@quiosquepraia.com>",
+        to: [email],
+        subject: "Obrigado pelo interesse! 🏖️",
+        html: `
+          <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:32px;background:#0D2137;border-radius:16px;color:white">
+            <div style="font-size:48px;text-align:center;margin-bottom:16px">🏖️</div>
+            <h1 style="color:#F5E6C8;text-align:center;font-size:24px;margin-bottom:16px">
+              Recebemos seu contato!
+            </h1>
+            <p style="color:rgba(255,255,255,0.7);font-size:15px;line-height:1.7;text-align:center;margin-bottom:24px">
+              Obrigado pelo interesse no <strong style="color:#00B4D8">Quiosque Praia</strong>.<br />
+              Nossa equipe entrará em contato em breve no seu email<br />
+              <strong style="color:#06D6A0">${email}</strong>
+            </p>
+            <div style="background:rgba(0,180,216,0.1);border:1px solid rgba(0,180,216,0.3);border-radius:12px;padding:20px;margin-bottom:24px;text-align:center">
+              <div style="color:#F5E6C8;font-size:14px;margin-bottom:8px">Enquanto isso, experimente nossa demo gratuita:</div>
+              <a href="${frontendUrl}/demo" style="display:inline-block;background:#06D6A0;color:#0D2137;padding:12px 24px;border-radius:10px;text-decoration:none;font-weight:700;font-size:15px">
+                🚀 Ver Demo ao Vivo
+              </a>
+            </div>
+            <p style="color:rgba(255,255,255,0.3);font-size:12px;text-align:center">
+              Quiosque Praia · Sistema de pedidos para quiosques de praia
+            </p>
+          </div>
+        `,
+      }),
+    });
+
+    return { ok: true };
+  },
+});

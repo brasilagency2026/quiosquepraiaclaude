@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { useAction } from 'convex/react'
+import { api } from '../../convex/_generated/api'
 import { useNavigate } from 'react-router-dom'
 
 const FEATURES = [
@@ -21,6 +23,8 @@ export default function Landing() {
   const [email, setEmail] = useState('')
   const [enviado, setEnviado] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [enviando, setEnviando] = useState(false)
+  const enviarContato = useAction(api.inscricoes.enviarContato)
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40)
@@ -28,10 +32,19 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  function handleCadastro(e) {
+  async function handleCadastro(e) {
     e.preventDefault()
-    if (!email) return
-    setEnviado(true)
+    if (!email || enviando) return
+    setEnviando(true)
+    try {
+      await enviarContato({ email })
+      setEnviado(true)
+    } catch (err) {
+      console.error(err)
+      setEnviado(true) // show success anyway
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -182,13 +195,16 @@ export default function Landing() {
             <div style={{ fontSize: 56, marginBottom: 8 }}>🆓</div>
             <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 52, fontWeight: 800, color: '#06D6A0', marginBottom: 4 }}>Grátis</div>
             <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 36 }}>durante o período de lançamento</div>
-            {['Quiosques ilimitados', 'Pedidos ilimitados', 'Todos os panels incluídos', 'Suporte por WhatsApp', 'Taxa MercadoPago: ~4,99% por transação'].map((item, i) => (
+            {['Pedidos ilimitados', 'Todos os panels incluídos', 'Suporte por WhatsApp', 'Após 7 dias: R$ 200/mês · email para continuar'].map((item, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
                 <span style={{ color: '#06D6A0', fontSize: 18, flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 15, color: i === 4 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{item}</span>
+                <span style={{ fontSize: 15, color: i === 3 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{item}</span>
               </div>
             ))}
-            <button onClick={() => navigate('/inscricao')} style={{ width: '100%', marginTop: 32, background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 32px rgba(6,214,160,0.25)' }}>
+            <div style={{ margin: '20px 0', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 12, padding: '14px 16px', fontSize: 13, color: '#FCD34D', lineHeight: 1.6 }}>
+              📩 Após os 7 dias gratuitos, você receberá um email para continuar com uma taxa única de <strong>R$ 200/mês</strong>. Sem surpresas, sem cobrança automática.
+            </div>
+            <button onClick={() => navigate('/inscricao')} style={{ width: '100%', marginTop: 8, background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 32px rgba(6,214,160,0.25)' }}>
               🚀 Quero começar agora
             </button>
           </div>
@@ -213,8 +229,8 @@ export default function Landing() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="seu@email.com"
                 style={{ background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(0,180,216,0.25)', borderRadius: 14, padding: '16px 20px', fontSize: 16, color: 'white', outline: 'none' }} />
-              <button onClick={handleCadastro} style={{ background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 16, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 24px rgba(6,214,160,0.25)' }}>
-                Entrar em contato →
+              <button onClick={handleCadastro} disabled={enviando} style={{ background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 16, fontWeight: 700, cursor: enviando ? 'not-allowed' : 'pointer', boxShadow: '0 8px 24px rgba(6,214,160,0.25)', opacity: enviando ? 0.7 : 1 }}>
+                {enviando ? '⏳ Enviando...' : 'Entrar em contato →'}
               </button>
               <button onClick={() => navigate('/inscricao')} style={{ background: 'transparent', border: '1.5px solid rgba(255,255,255,0.12)', borderRadius: 14, padding: '14px', fontSize: 15, fontWeight: 600, cursor: 'pointer', color: 'rgba(255,255,255,0.55)' }}>
                 Ou cadastre-se agora mesmo →
