@@ -105,15 +105,14 @@ export default function AdminPagamento({ kiosque }) {
         </div>
       </div>
 
-      {/* Opções de conexão */}
+      {/* Conectar */}
       {!isConfigured && (
         <>
           <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, color: 'var(--ocean)', marginBottom: 14 }}>
             Conectar plataforma de pagamento
           </p>
 
-          {/* MercadoPago */}
-          <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', marginBottom: 14 }}>
+          <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
               <div style={{ width: 52, height: 52, borderRadius: 14, background: '#E8F4FD', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>🇧🇷</div>
               <div style={{ flex: 1 }}>
@@ -137,18 +136,6 @@ export default function AdminPagamento({ kiosque }) {
             >
               🔗 Conectar com MercadoPago
             </a>
-          </div>
-
-          {/* Stripe — em breve */}
-          <div style={{ background: 'white', borderRadius: 16, padding: 20, boxShadow: 'var(--shadow-card)', opacity: 0.55 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: '#F0EFFF', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, flexShrink: 0 }}>🌎</div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 17, fontWeight: 800, color: '#635BFF' }}>Stripe</div>
-                <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>Cartão Internacional · Apple Pay · Google Pay</div>
-              </div>
-              <span style={{ background: '#F1F5F9', color: '#64748B', padding: '3px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700 }}>Em breve</span>
-            </div>
           </div>
         </>
       )}
