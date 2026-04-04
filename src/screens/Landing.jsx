@@ -188,25 +188,56 @@ export default function Landing() {
 
       {/* PREÇO */}
       <section style={{ padding: '100px 24px', background: 'rgba(255,255,255,0.02)' }}>
-        <div style={{ maxWidth: 500, margin: '0 auto', textAlign: 'center' }}>
+        <div style={{ maxWidth: 580, margin: '0 auto', textAlign: 'center' }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.15em', textTransform: 'uppercase', marginBottom: 12 }}>PREÇO</div>
           <h2 style={{ fontSize: 'clamp(28px, 5vw, 44px)', fontWeight: 800, color: '#F5E6C8', marginBottom: 48, lineHeight: 1.2 }}>Simples e sem surpresas</h2>
-          <div className="hover-lift" style={{ background: 'linear-gradient(160deg, rgba(0,180,216,0.08), rgba(6,214,160,0.05))', border: '1px solid rgba(0,180,216,0.2)', borderRadius: 24, padding: '48px 40px' }}>
-            <div style={{ fontSize: 56, marginBottom: 8 }}>🆓</div>
-            <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 52, fontWeight: 800, color: '#06D6A0', marginBottom: 4 }}>Grátis</div>
-            <div style={{ fontSize: 15, color: 'rgba(255,255,255,0.4)', marginBottom: 36 }}>durante o período de lançamento</div>
-            {['Pedidos ilimitados', 'Todos os panels incluídos', 'Suporte por WhatsApp', 'Após 7 dias: R$ 200/mês · email para continuar'].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0', borderBottom: i < 4 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <span style={{ color: '#06D6A0', fontSize: 18, flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 15, color: i === 3 ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.7)', textAlign: 'left' }}>{item}</span>
+
+          {/* Card preço */}
+          <div className="hover-lift" style={{ background: 'linear-gradient(160deg, rgba(0,180,216,0.08), rgba(6,214,160,0.05))', border: '1px solid rgba(0,180,216,0.2)', borderRadius: 24, padding: '40px 36px', marginBottom: 20 }}>
+            <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 56, fontWeight: 800, color: '#06D6A0', marginBottom: 6 }}>Grátis 7 dias</div>
+            <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.5)', marginBottom: 28 }}>Sem cartão de crédito · Comece agora</div>
+            {[
+              { icon: '✓', text: 'Pedidos ilimitados', dim: false },
+              { icon: '✓', text: 'Todos os panels incluídos (Cozinha, Garçom, Caixa, Admin)', dim: false },
+              { icon: '✓', text: 'Suporte por WhatsApp', dim: false },
+              { icon: '✓', text: '💳 Sem maquininha — receba pelo celular via MercadoPago', dim: false },
+              { icon: '✓', text: '🏖️ Cadastro Premium grátis em quiosquepraia.com', dim: false },
+              { icon: '→', text: 'Após 7 dias: R$ 200/mês · você decide se quer continuar', dim: true },
+            ].map((item, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 0', borderBottom: i < 5 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <span style={{ color: item.dim ? 'rgba(255,255,255,0.3)' : '#06D6A0', fontSize: 16, flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                <span style={{ fontSize: 14, color: item.dim ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)', textAlign: 'left', lineHeight: 1.5 }}>{item.text}</span>
               </div>
             ))}
-            <div style={{ margin: '20px 0', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 12, padding: '14px 16px', fontSize: 13, color: '#FCD34D', lineHeight: 1.6 }}>
-              📩 Após os 7 dias gratuitos, você receberá um email para continuar com uma taxa única de <strong>R$ 200/mês</strong>. Sem surpresas, sem cobrança automática.
+            <div style={{ margin: '20px 0 4px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '12px 16px', fontSize: 13, color: 'rgba(255,205,85,0.8)', lineHeight: 1.6 }}>
+              📩 Após os 7 dias, você receberá um email para continuar por <strong>R$ 200/mês</strong>.
             </div>
-            <button onClick={() => navigate('/inscricao')} style={{ width: '100%', marginTop: 8, background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 32px rgba(6,214,160,0.25)' }}>
+            <button onClick={() => navigate('/inscricao')} style={{ width: '100%', marginTop: 20, background: 'linear-gradient(135deg, #06D6A0, #00B4D8)', color: '#050F1A', border: 'none', borderRadius: 14, padding: '16px', fontSize: 17, fontWeight: 700, cursor: 'pointer', boxShadow: '0 8px 32px rgba(6,214,160,0.25)' }}>
               🚀 Quero começar agora
             </button>
+          </div>
+
+          {/* Bloc maquininha */}
+          <div style={{ background: 'rgba(0,180,216,0.06)', border: '1px solid rgba(0,180,216,0.15)', borderRadius: 18, padding: '24px 28px', textAlign: 'left', marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#00B4D8', marginBottom: 10 }}>
+              💳 Sem maquininha de cartão
+            </div>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7 }}>
+              Esqueça o aluguel de maquininha. Com o Quiosque Praia, seus clientes pagam via <strong style={{ color: 'white' }}>PIX, cartão ou dinheiro</strong> diretamente pelo celular — o dinheiro cai na sua conta <strong style={{ color: '#06D6A0' }}>MercadoPago</strong> instantaneamente, sem intermediários.
+            </p>
+          </div>
+
+          {/* Bloc quiosquepraia.com */}
+          <div style={{ background: 'rgba(167,139,250,0.06)', border: '1px solid rgba(167,139,250,0.2)', borderRadius: 18, padding: '24px 28px', textAlign: 'left' }}>
+            <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#A78BFA', marginBottom: 10 }}>
+              🏖️ Membro Premium em quiosquepraia.com
+            </div>
+            <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 1.7, marginBottom: 12 }}>
+              Ao se inscrever, seu quiosque ganha automaticamente uma <strong style={{ color: 'white' }}>ficha premium e gratuita</strong> no portal geolocalizável dos quiosques de praia do Brasil — <a href="https://quiosquepraia.com" target="_blank" rel="noopener noreferrer" style={{ color: '#A78BFA', fontWeight: 600 }}>quiosquepraia.com</a>.
+            </p>
+            <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
+              Turistas e banhistas encontram seu quiosque pelo mapa, veem o cardápio e chegam até você. Visibilidade máxima, sem custo extra.
+            </p>
           </div>
         </div>
       </section>
