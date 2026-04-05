@@ -18,6 +18,7 @@ export const solicitar = mutation({
     ville: v.string(),
     etat: v.string(),
     email: v.string(),
+    whatsapp: v.optional(v.string()),
     clerkUserId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -49,6 +50,7 @@ export const solicitar = mutation({
       ville: args.ville,
       etat: args.etat,
       email: args.email,
+      whatsapp: args.whatsapp,
       clerkUserId: args.clerkUserId,
       statut: "pendente",
       slug,

@@ -33,7 +33,7 @@ export default function Inscricao() {
   const [showConfirmar, setShowConfirmar] = useState(false)
 
   const [form, setForm] = useState({
-    nomGestor: '', nomKiosque: '', ville: '', etat: '',
+    nomGestor: '', nomKiosque: '', ville: '', etat: '', whatsapp: '',
     email: '', senha: '', confirmarSenha: '',
   })
   const set = (k, v) => { setForm(f => ({ ...f, [k]: v })); setErro('') }
@@ -78,6 +78,8 @@ export default function Inscricao() {
   // ── Étape 2 : créer compte Clerk ─────────────────
   async function criarConta() {
     if (!form.email || !form.email.includes('@')) { setErro('Informe um email válido'); return }
+    const wDigits = form.whatsapp.replace(/\D/g, '')
+    if (!wDigits || wDigits.length < 10) { setErro('Informe um WhatsApp válido com DDD'); return }
     if (form.senha.length < 8) { setErro('A senha deve ter pelo menos 8 caracteres'); return }
     if (form.senha !== form.confirmarSenha) { setErro('As senhas não conferem'); return }
     if (!isLoaded) return
@@ -159,7 +161,7 @@ export default function Inscricao() {
               Em breve você receberá um email com o link do seu painel.
             </p>
             <div style={{ background: 'rgba(6,214,160,0.08)', border: '1px solid rgba(6,214,160,0.2)', borderRadius: 14, padding: '16px 20px', marginBottom: 24, textAlign: 'left' }}>
-              {[['Gestor', form.nomGestor], ['Quiosque', form.nomKiosque], ['Cidade', `${form.ville} · ${form.etat}`], ['Email', form.email]].map(([k, v]) => (
+              {[['Gestor', form.nomGestor], ['Quiosque', form.nomKiosque], ['Cidade', `${form.ville} · ${form.etat}`], ['Email', form.email], ['WhatsApp', form.whatsapp]].map(([k, v]) => (
                 <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 14 }}>
                   <span style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter,sans-serif' }}>{k}</span>
                   <span style={{ fontWeight: 600 }}>{v}</span>
@@ -233,6 +235,21 @@ export default function Inscricao() {
             </div>
             <label style={s.label}>Email *</label>
             <input style={s.input} type="email" value={form.email} onChange={e => set('email', e.target.value)} placeholder="seu@email.com" autoFocus />
+            <label style={s.label}>WhatsApp * (DDD + número)</label>
+            <div style={{ position: 'relative', marginBottom: 14 }}>
+              <span style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', fontSize: 15, color: 'rgba(255,255,255,0.4)', fontFamily: 'Inter,sans-serif' }}>🇧🇷 +55</span>
+              <input style={{ ...s.input, marginBottom: 0, paddingLeft: 70 }} type="tel" inputMode="numeric"
+                value={form.whatsapp}
+                onChange={e => {
+                  const v = e.target.value.replace(/\D/g, '').slice(0, 11)
+                  // Format: (XX) XXXXX-XXXX
+                  let fmt = v
+                  if (v.length > 2) fmt = '(' + v.slice(0,2) + ') ' + v.slice(2)
+                  if (v.length > 7) fmt = '(' + v.slice(0,2) + ') ' + v.slice(2,7) + '-' + v.slice(7)
+                  set('whatsapp', fmt)
+                }}
+                placeholder="(13) 99999-9999" />
+            </div>
             <label style={s.label}>Senha * (mínimo 8 caracteres)</label>
             <div style={{ position: 'relative', marginBottom: 14 }}>
               <input style={{ ...s.input, marginBottom: 0, paddingRight: 48 }} type={showSenha ? 'text' : 'password'} value={form.senha} onChange={e => set('senha', e.target.value)} placeholder="Sua senha" />

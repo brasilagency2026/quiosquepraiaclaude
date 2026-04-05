@@ -156,6 +156,7 @@ export default defineSchema({
     ville: v.string(),
     etat: v.string(),
     email: v.string(),
+    whatsapp: v.optional(v.string()),
     clerkUserId: v.optional(v.string()),
     statut: v.union(v.literal("pendente"), v.literal("aprovado"), v.literal("rejeitado")),
     slug: v.optional(v.string()),

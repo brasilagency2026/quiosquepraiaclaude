@@ -200,13 +200,18 @@ export default function Landing() {
               { icon: '✓', text: 'Pedidos ilimitados', dim: false },
               { icon: '✓', text: 'Todos os panels incluídos (Cozinha, Garçom, Caixa, Admin)', dim: false },
               { icon: '✓', text: 'Suporte por WhatsApp', dim: false },
+              { icon: '▶', text: 'Tutoriais em vídeo no YouTube', dim: false, link: 'https://www.youtube.com/@Quiosquepraia-q5d' },
               { icon: '✓', text: '💳 Sem maquininha — receba pelo celular via MercadoPago', dim: false },
               { icon: '✓', text: '🏖️ Cadastro Premium grátis em quiosquepraia.com', dim: false },
               { icon: '→', text: 'Após 7 dias: R$ 200/mês · você decide se quer continuar', dim: true },
             ].map((item, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 0', borderBottom: i < 5 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
-                <span style={{ color: item.dim ? 'rgba(255,255,255,0.3)' : '#06D6A0', fontSize: 16, flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
-                <span style={{ fontSize: 14, color: item.dim ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)', textAlign: 'left', lineHeight: 1.5 }}>{item.text}</span>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '10px 0', borderBottom: i < 6 ? '1px solid rgba(255,255,255,0.06)' : 'none' }}>
+                <span style={{ color: item.dim ? 'rgba(255,255,255,0.3)' : item.icon === '▶' ? '#FF0000' : '#06D6A0', fontSize: 16, flexShrink: 0, marginTop: 1 }}>{item.icon}</span>
+                {item.link ? (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ fontSize: 14, color: '#FF6B6B', textAlign: 'left', lineHeight: 1.5, textDecoration: 'underline', textUnderlineOffset: 3 }}>{item.text}</a>
+                ) : (
+                  <span style={{ fontSize: 14, color: item.dim ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.8)', textAlign: 'left', lineHeight: 1.5 }}>{item.text}</span>
+                )}
               </div>
             ))}
             <div style={{ margin: '20px 0 4px', background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 12, padding: '12px 16px', fontSize: 13, color: 'rgba(255,205,85,0.8)', lineHeight: 1.6 }}>
@@ -271,12 +276,32 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* YOUTUBE */}
+      <section style={{ padding: '60px 24px', textAlign: 'center' }}>
+        <div style={{ maxWidth: 580, margin: '0 auto' }}>
+          <div style={{ background: 'rgba(255,0,0,0.08)', border: '1px solid rgba(255,0,0,0.2)', borderRadius: 20, padding: '32px 28px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+            <div style={{ fontSize: 52 }}>▶️</div>
+            <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 22, fontWeight: 800, color: '#F5E6C8' }}>
+              Aprenda em minutos
+            </div>
+            <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.7, maxWidth: 420 }}>
+              Tutoriais passo a passo no nosso canal do YouTube — configure seu quiosque, crie o cardápio e comece a receber pedidos em menos de 1 hora.
+            </p>
+            <a href="https://www.youtube.com/@Quiosquepraia-q5d" target="_blank" rel="noopener noreferrer"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: '#FF0000', color: 'white', borderRadius: 14, padding: '14px 28px', textDecoration: 'none', fontFamily: "'Baloo 2',cursive", fontSize: 16, fontWeight: 700, boxShadow: '0 8px 24px rgba(255,0,0,0.3)' }}>
+              ▶ Ver Tutoriais no YouTube
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* FOOTER */}
       <footer style={{ padding: '28px 32px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
         <div style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#F5E6C8' }}>
           Quiosque <span style={{ color: '#00B4D8' }}>Praia</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>© 2026 · Feito com 🌊 para a praia brasileira</div>
+        <a href="https://www.youtube.com/@Quiosquepraia-q5d" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'rgba(255,100,100,0.5)', textDecoration: 'none' }}>▶ YouTube</a>
         <button onClick={() => navigate('/superadmin')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.08)', fontSize: 11, cursor: 'pointer' }}>admin</button>
       </footer>
     </div>
