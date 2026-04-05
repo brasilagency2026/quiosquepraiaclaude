@@ -116,6 +116,13 @@ export default function SuperAdmin() {
                     <div style={{ fontSize: 14, color: '#00B4D8', fontWeight: 600 }}>🏖️ {insc.nomKiosque}</div>
                     <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', marginTop: 2 }}>{insc.ville} · {insc.etat}</div>
                     <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{insc.email}</div>
+                    {insc.whatsapp && (
+                      <a href={`https://wa.me/55${insc.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginTop: 6, background: '#25D36622', border: '1px solid #25D36644', borderRadius: 8, padding: '4px 10px', textDecoration: 'none' }}>
+                        <span style={{ fontSize: 14 }}>💬</span>
+                        <span style={{ fontSize: 12, color: '#25D366', fontWeight: 700 }}>{insc.whatsapp}</span>
+                      </a>
+                    )}
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
                       {new Date(insc.criadoEm).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -146,6 +153,9 @@ export default function SuperAdmin() {
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#F5E6C8' }}>{insc.nomGestor} · {insc.nomKiosque}</div>
                   <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>{insc.email} · {insc.ville}/{insc.etat}</div>
+                  {insc.whatsapp && (
+                    <a href={`https://wa.me/55${insc.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: 11, color: '#25D366', textDecoration: 'none' }}>💬 {insc.whatsapp}</a>
+                  )}
                 </div>
                 <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 8, background: insc.statut === 'aprovado' ? 'rgba(6,214,160,0.15)' : 'rgba(255,107,107,0.15)', color: insc.statut === 'aprovado' ? '#06D6A0' : '#FF6B6B' }}>
                   {insc.statut === 'aprovado' ? '✅ Aprovado' : '✕ Rejeitado'}
