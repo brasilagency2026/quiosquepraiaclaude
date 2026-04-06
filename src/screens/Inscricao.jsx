@@ -120,6 +120,7 @@ export default function Inscricao() {
         ville: form.ville,
         etat: form.etat,
         email: form.email,
+        whatsapp: form.whatsapp || undefined,
         clerkUserId: result.createdUserId ?? undefined,
       })
       setEtapa('sucesso')
