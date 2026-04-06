@@ -24,6 +24,24 @@ export default function SuperAdmin() {
   const aprovar = useAction(api.inscricoes.aprovar)
   const rejeitar = useMutation(api.inscricoes.rejeitar)
   const pendentes = inscricoes?.filter(i => i.statut === 'pendente') ?? []
+  const [busca, setBusca] = useState('')
+
+  // Filtro de busca nas inscrições
+  const inscricoesFiltradas = inscricoes?.filter(insc => {
+    if (!busca.trim()) return true
+    const q = busca.toLowerCase()
+    return (
+      insc.nomGestor?.toLowerCase().includes(q) ||
+      insc.nomKiosque?.toLowerCase().includes(q) ||
+      insc.email?.toLowerCase().includes(q) ||
+      insc.ville?.toLowerCase().includes(q) ||
+      insc.etat?.toLowerCase().includes(q) ||
+      insc.whatsapp?.replace(/\D/g,'').includes(q.replace(/\D/g,'')) ||
+      insc.whatsapp?.toLowerCase().includes(q)
+    )
+  }) ?? []
+  const pendentesFiltradas = inscricoesFiltradas.filter(i => i.statut === 'pendente')
+  const historicasFiltradas = inscricoesFiltradas.filter(i => i.statut !== 'pendente')
 
   if (!isLoaded || !isAuthenticated) return <Loading />
 
@@ -97,8 +115,28 @@ export default function SuperAdmin() {
           + Criar Novo Quiosque
         </button>
 
+        {/* Busca de inscrições */}
+        {inscricoes && inscricoes.length > 0 && (
+          <div style={{ marginBottom: 16, position: 'relative' }}>
+            <input
+              value={busca}
+              onChange={e => setBusca(e.target.value)}
+              placeholder="🔍 Buscar por nome, quiosque, email, cidade, estado ou WhatsApp..."
+              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1.5px solid rgba(0,180,216,0.25)', borderRadius: 12, padding: '12px 16px', fontSize: 14, color: 'white', fontFamily: 'Inter,sans-serif', outline: 'none', boxSizing: 'border-box' }}
+            />
+            {busca && (
+              <button onClick={() => setBusca('')} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', fontSize: 18, cursor: 'pointer', lineHeight: 1 }}>×</button>
+            )}
+            {busca && (
+              <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 6, fontFamily: 'Inter,sans-serif' }}>
+                {inscricoesFiltradas.length} resultado(s) encontrado(s)
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Inscrições pendentes */}
-        {pendentes.length > 0 && (
+        {pendentesFiltradas.length > 0 && (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
               <p style={{ fontFamily: "'Baloo 2',cursive", fontSize: 18, fontWeight: 700, color: '#F5E6C8' }}>
@@ -108,7 +146,7 @@ export default function SuperAdmin() {
                 {pendentes.length}
               </span>
             </div>
-            {pendentes.map(insc => (
+            {pendentesFiltradas.map(insc => (
               <div key={insc._id} style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 16, padding: '16px 20px', marginBottom: 12 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
                   <div>
@@ -143,12 +181,12 @@ export default function SuperAdmin() {
         )}
 
         {/* Toutes les inscriptions (historique) */}
-        {inscricoes && inscricoes.filter(i => i.statut !== 'pendente').length > 0 && (
+        {historicasFiltradas.length > 0 && (
           <details style={{ marginBottom: 20 }}>
             <summary style={{ fontFamily: "'Baloo 2',cursive", fontSize: 15, fontWeight: 600, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', marginBottom: 10 }}>
-              Histórico de inscrições ({inscricoes.filter(i => i.statut !== 'pendente').length})
+              Histórico de inscrições ({historicasFiltradas.length})
             </summary>
-            {inscricoes.filter(i => i.statut !== 'pendente').map(insc => (
+            {historicasFiltradas.map(insc => (
               <div key={insc._id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '12px 16px', marginBottom: 8, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 14, fontWeight: 600, color: '#F5E6C8' }}>{insc.nomGestor} · {insc.nomKiosque}</div>
