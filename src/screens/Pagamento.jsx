@@ -50,7 +50,7 @@ export default function Pagamento({ total, cart, onBack, onConfirm, slug, pedido
           kiosqueSlug: slug,
           montant: total,
           pedidoId: resolvedId,
-          metodo: 'pix',
+          metodo: 'all',
           descricao: `Pedido Quiosque Praia`,
         })
         if (result?.initPoint) {

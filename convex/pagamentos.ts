@@ -242,7 +242,7 @@ async function criarPreferencaMP(kiosque: any, args: any) {
     },
   };
 
-  // Restreindre les méthodes selon le choix
+  // Si un metodo spécifique est demandé, restreindre. Sinon ("all"), laisser MP afficher toutes les options.
   if (args.metodo === "pix") {
     body.payment_methods = {
       excluded_payment_types: [
@@ -265,6 +265,7 @@ async function criarPreferencaMP(kiosque: any, args: any) {
       installments: 1,
     };
   }
+  // metodo === "all" → aucune restriction, MP affiche PIX + Crédit + Débit + Boleto
 
   const response = await fetch(
     "https://api.mercadopago.com/checkout/preferences",
