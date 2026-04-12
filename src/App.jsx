@@ -18,6 +18,7 @@ import SuperAdmin from './screens/SuperAdmin'
 import LoginPIN from './screens/LoginPIN'
 import LoginGestor from './screens/LoginGestor'
 import Inscricao from './screens/Inscricao'
+import ConfirmadoRetorno from './screens/ConfirmadoRetorno'
 import Toast from './components/Toast'
 import { ToastProvider } from './context/ToastContext'
 
@@ -57,6 +58,9 @@ export default function App() {
         {/* Inscrição */}
         <Route path="/inscricao" element={<Inscricao />} />
         <Route path="/inscricao/sucesso" element={<Inscricao />} />
+
+        {/* Retour MercadoPago / Stripe */}
+        <Route path="/confirmado" element={<ConfirmadoRetorno />} />
 
         {/* Super Admin */}
         <Route path="/superadmin" element={<SuperAdmin />} />

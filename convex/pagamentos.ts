@@ -237,8 +237,9 @@ async function criarPreferencaMP(kiosque: any, args: any) {
     notification_url: `${process.env.CONVEX_SITE_URL}/webhook/mercadopago`,
     auto_return: "approved",
     back_urls: {
-      success: `${process.env.FRONTEND_URL}`,
-      failure: `${process.env.FRONTEND_URL}`,
+      success: `${process.env.FRONTEND_URL}/confirmado`,
+      failure: `${process.env.FRONTEND_URL}/confirmado`,
+      pending: `${process.env.FRONTEND_URL}/confirmado`,
     },
   };
 
