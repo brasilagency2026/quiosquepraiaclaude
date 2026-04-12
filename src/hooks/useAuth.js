@@ -15,9 +15,9 @@ export function useAuthPIN() {
     session,
     isLoading: session === undefined,
     isAuth: session !== null && session !== undefined,
-    logout: () => {
+    logout: (redirectTo) => {
       localStorage.removeItem('quiosquepraia_pin_token')
-      window.location.href = '/scan'
+      window.location.href = redirectTo || '/scan'
     }
   }
 }

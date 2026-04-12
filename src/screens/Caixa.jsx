@@ -65,7 +65,7 @@ export default function Caixa() {
               {kiosque?.nom} · {session?.nom}
             </p>
           </div>
-          <button onClick={logout} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
+          <button onClick={() => logout(`/login/${slug}`)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>
             Sair
           </button>
         </div>

@@ -69,7 +69,7 @@ export default function Cozinha() {
             <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#06D6A0', animation: 'blink 1.5s ease-in-out infinite' }} />
             Online
           </div>
-          <button onClick={logout} style={{ background: '#374151', border: 'none', borderRadius: 8, padding: '6px 12px', color: '#9CA3AF', fontSize: 12, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>Sair</button>
+          <button onClick={() => logout(`/login/${slug}`)} style={{ background: '#374151', border: 'none', borderRadius: 8, padding: '6px 12px', color: '#9CA3AF', fontSize: 12, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>Sair</button>
         </div>
       </div>
 

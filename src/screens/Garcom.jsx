@@ -51,7 +51,7 @@ export default function Garcom() {
           </h2>
           <p style={{ fontSize: 13, color: 'var(--wave-light)', marginTop: 4 }}>{session?.nom} · {kiosque?.nom}</p>
         </div>
-        <button onClick={logout} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>Sair</button>
+        <button onClick={() => logout(`/login/${slug}`)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: 10, padding: '8px 14px', color: 'rgba(255,255,255,0.6)', fontSize: 13, cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}>Sair</button>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 16px 80px' }}>
