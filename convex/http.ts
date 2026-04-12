@@ -77,14 +77,8 @@ http.route({
       // MercadoPago envoie: { type: "payment", data: { id: "xxx" } }
       if (body.type === "payment" && body.data?.id) {
         const paymentId = String(body.data.id);
-
-        // En production: vérifier la signature X-Signature
-        // const signature = request.headers.get("x-signature");
-        // await verifyMPSignature(signature, body);
-
-        // Trouver le pedido par pagamentoId et mettre à jour statut
-        // Pour l'instant on log — à implémenter avec la vraie logique
-        console.log("Paiement MP confirmé:", paymentId);
+        // Traiter le paiement via internalAction
+        await ctx.runAction(internal.pagamentos.processarWebhookMP, { paymentId });
       }
 
       return new Response(JSON.stringify({ ok: true }), {

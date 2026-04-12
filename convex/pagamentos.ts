@@ -336,6 +336,46 @@ async function criarIntentStripe(kiosque: any, args: any) {
 // INTERNAL — accès aux secrets (jamais exposés publiquement)
 // ═══════════════════════════════════════════════════════
 
+// Traite le webhook MP: récupère les détails du paiement et confirme le pedido
+export const processarWebhookMP = internalAction({
+  args: { paymentId: v.string() },
+  handler: async (ctx, { paymentId }) => {
+    // Récupérer tous les kiosques avec MP configuré
+    const kiosques = await ctx.runQuery(internal.pagamentos.getAllKiosquesMP);
+
+    for (const kiosque of kiosques) {
+      try {
+        const token = await decrypt(kiosque.pagamento!.mp_access_token_enc!);
+        const r = await fetch(`https://api.mercadopago.com/v1/payments/${paymentId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!r.ok) continue;
+        const payment = await r.json();
+
+        if (payment.status === "approved" && payment.external_reference) {
+          await ctx.runMutation(internal.pedidos.confirmarPagamentoInternal, {
+            externalReference: payment.external_reference,
+            pagamentoId: paymentId,
+            metodoPagamento: payment.payment_type_id ?? "digital",
+          });
+          console.log("MP webhook: pedido confirmado", payment.external_reference, "payment:", paymentId);
+          return { ok: true };
+        }
+        // Payment found but not approved
+        if (payment.external_reference) {
+          console.log("MP webhook: payment status =", payment.status, "for pedido", payment.external_reference);
+          return { ok: true, status: payment.status };
+        }
+      } catch (e) {
+        // Ce kiosque n'a pas accès — continuer avec le prochain
+        continue;
+      }
+    }
+    console.warn("MP webhook: aucun kiosque n'a pu traiter payment:", paymentId);
+    return { ok: false };
+  },
+});
+
 export const getKiosqueComSegredos = internalQuery({
   args: { clerkId: v.string() },
   handler: async (ctx, { clerkId }) => {
@@ -345,6 +385,15 @@ export const getKiosqueComSegredos = internalQuery({
       .first();
     if (!usuario) return null;
     return ctx.db.get(usuario.kiosqueId);
+  },
+});
+
+export const getAllKiosquesMP = internalQuery({
+  handler: async (ctx) => {
+    const all = await ctx.db.query("kiosques").collect();
+    return all.filter(
+      (k) => k.pagamento?.provider === "mercadopago" && k.pagamento?.mp_access_token_enc
+    );
   },
 });
 

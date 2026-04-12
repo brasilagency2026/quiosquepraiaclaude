@@ -2,13 +2,14 @@ import { useQuery } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 
 const STEPS = [
+  { id: 'aguardando_pagamento', icon: '⏳', title: 'Aguardando Pagamento', sub: 'Confirmando com o provedor...' },
   { id: 'pago', icon: '✓', title: 'Pagamento Aprovado', sub: 'Pagamento confirmado' },
   { id: 'cozinha', icon: '👨‍🍳', title: 'Preparando na Cozinha', sub: 'Estimativa: 15–20 min' },
   { id: 'pronto', icon: '🛵', title: 'A Caminho do Guarda-Sol', sub: 'Garçom a entregar em breve' },
   { id: 'entregue', icon: '🏖️', title: 'Entregue!', sub: 'Aproveite!' },
 ]
 
-const ORDER = ['pago', 'cozinha', 'pronto', 'entregue']
+const ORDER = ['aguardando_pagamento', 'pago', 'cozinha', 'pronto', 'entregue']
 
 export default function Confirmado({ pedidoId, numero, onNewOrder }) {
   const pedido = useQuery(api.pedidos.acompanharPedido, pedidoId ? { pedidoId } : 'skip')

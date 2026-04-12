@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // ── Queries temps réel ───────────────────────────────
@@ -66,7 +66,7 @@ export const getEstatisticas = query({
       .withIndex("by_kiosque", (q) => q.eq("kiosqueId", kiosqueId))
       .collect();
     const pedidosHoje = pedidos.filter(
-      (p) => p.criadoEm >= hoje && p.statut !== "cancelado"
+      (p) => p.criadoEm >= hoje && p.statut !== "cancelado" && p.statut !== "aguardando_pagamento"
     );
     const faturamento = pedidosHoje.reduce(
       (s, p) => s + p.total - p.totalRembourse,
@@ -119,6 +119,9 @@ export const criar = mutation({
     const numero =
       pedidosHoje.filter((p) => p.criadoEm >= hoje).length + 1;
 
+    // Paiement digital: statut en attente jusqu'à confirmation MP/Stripe
+    const isPendingDigital = args.metodoPagamento === "digital";
+
     const pedidoId = await ctx.db.insert("pedidos", {
       kiosqueId: args.kiosqueId,
       parasolNumero: args.parasolNumero,
@@ -126,7 +129,7 @@ export const criar = mutation({
       items: args.items.map((i) => ({ ...i, annule: false })),
       total: args.total,
       totalRembourse: 0,
-      statut: "pago",
+      statut: isPendingDigital ? "aguardando_pagamento" : "pago",
       pagamentoId: args.pagamentoId,
       metodoPagamento: args.metodoPagamento,
       observacao: args.observacao,
@@ -135,6 +138,51 @@ export const criar = mutation({
       criadoEm: Date.now(),
     });
     return { id: pedidoId, numero };
+  },
+});
+
+// Confirmer le paiement d'un pedido (appelé par webhook MP/Stripe ou retour client)
+export const confirmarPagamento = mutation({
+  args: {
+    pedidoId: v.id("pedidos"),
+    pagamentoId: v.optional(v.string()),
+    metodoPagamento: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const pedido = await ctx.db.get(args.pedidoId);
+    if (!pedido) throw new Error("Pedido não encontrado");
+    // Ne confirmer que les pedidos en attente
+    if (pedido.statut !== "aguardando_pagamento") return { ok: true, already: true };
+    const patch: any = { statut: "pago" as const };
+    if (args.pagamentoId) patch.pagamentoId = args.pagamentoId;
+    if (args.metodoPagamento) patch.metodoPagamento = args.metodoPagamento;
+    await ctx.db.patch(args.pedidoId, patch);
+    return { ok: true };
+  },
+});
+
+// Version interne pour le webhook (pas d'auth requise)
+export const confirmarPagamentoInternal = internalMutation({
+  args: {
+    externalReference: v.string(),
+    pagamentoId: v.string(),
+    metodoPagamento: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // external_reference = pedidoId (Convex ID)
+    const pedido = await ctx.db.get(args.externalReference as any);
+    if (!pedido) {
+      console.error("Pedido não encontrado para external_reference:", args.externalReference);
+      return { ok: false };
+    }
+    if (pedido.statut !== "aguardando_pagamento") return { ok: true, already: true };
+    await ctx.db.patch(pedido._id, {
+      statut: "pago",
+      pagamentoId: args.pagamentoId,
+      metodoPagamento: args.metodoPagamento ?? "digital",
+    });
+    console.log("Pagamento confirmado para pedido:", pedido._id, "payment:", args.pagamentoId);
+    return { ok: true };
   },
 });
 

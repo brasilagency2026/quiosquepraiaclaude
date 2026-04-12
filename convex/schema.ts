@@ -82,6 +82,7 @@ export default defineSchema({
     total: v.number(),
     totalRembourse: v.number(),
     statut: v.union(
+      v.literal("aguardando_pagamento"),
       v.literal("pago"),
       v.literal("cozinha"),
       v.literal("pronto"),

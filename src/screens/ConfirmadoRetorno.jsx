@@ -1,5 +1,6 @@
 import { useSearchParams } from 'react-router-dom'
-import { useQuery } from 'convex/react'
+import { useEffect, useRef } from 'react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../convex/_generated/api'
 import Confirmado from './Confirmado'
 
@@ -7,11 +8,35 @@ export default function ConfirmadoRetorno() {
   const [params] = useSearchParams()
   const externalRef = params.get('external_reference')
   const status = params.get('status') || params.get('collection_status')
+  const paymentId = params.get('payment_id') || params.get('collection_id')
+  const paymentType = params.get('payment_type')
+
+  const confirmarPagamento = useMutation(api.pedidos.confirmarPagamento)
+  const confirmed = useRef(false)
 
   const pedido = useQuery(
     api.pedidos.acompanharPedido,
     externalRef ? { pedidoId: externalRef } : 'skip'
   )
+
+  // Confirmer le paiement côté client si MP retourne approved
+  // (backup du webhook qui peut être lent)
+  useEffect(() => {
+    if (
+      !confirmed.current &&
+      externalRef &&
+      status === 'approved' &&
+      pedido &&
+      pedido.statut === 'aguardando_pagamento'
+    ) {
+      confirmed.current = true
+      confirmarPagamento({
+        pedidoId: externalRef,
+        pagamentoId: paymentId || undefined,
+        metodoPagamento: paymentType || 'digital',
+      }).catch(e => console.error('Erro ao confirmar pagamento:', e))
+    }
+  }, [externalRef, status, pedido, paymentId, paymentType])
 
   if (!externalRef) {
     return (
