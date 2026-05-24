@@ -301,6 +301,7 @@ export default function Landing() {
           Quiosque <span style={{ color: '#00B4D8' }}>Praia</span>
         </div>
         <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)' }}>© 2026 · Feito com 🤖 AI para Gérald LEVEQUE</div>
+        <button onClick={() => navigate('/quem-somos')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)', fontSize: 13, cursor: 'pointer', fontFamily: "'Sora', sans-serif" }}>Quem somos</button>
         <a href="https://www.youtube.com/@Quiosquepraia-q5d" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: 'rgba(255,100,100,0.5)', textDecoration: 'none' }}>▶ YouTube</a>
         <button onClick={() => navigate('/superadmin')} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.08)', fontSize: 11, cursor: 'pointer' }}>admin</button>
       </footer>

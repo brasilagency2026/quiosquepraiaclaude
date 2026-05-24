@@ -19,6 +19,7 @@ import LoginPIN from './screens/LoginPIN'
 import LoginGestor from './screens/LoginGestor'
 import Inscricao from './screens/Inscricao'
 import ConfirmadoRetorno from './screens/ConfirmadoRetorno'
+import QuemSomos from './screens/QuemSomos'
 import Toast from './components/Toast'
 import { ToastProvider } from './context/ToastContext'
 
@@ -29,6 +30,7 @@ export default function App() {
       <Routes>
         {/* Cliente — via QR code */}
         <Route path="/" element={<Landing />} />
+        <Route path="/quem-somos" element={<QuemSomos />} />
         <Route path="/scan" element={<ScanQR />} />
         <Route path="/demo" element={<DemoChoix />} />
         <Route path="/demo/cliente" element={<DemoCliente />} />
