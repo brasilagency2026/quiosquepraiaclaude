@@ -100,6 +100,20 @@ export default function QuemSomos() {
               </p>
             </div>
           </div>
+
+          {/* APP 4: CARDÁPIO DIGITAL & GESTÃO */}
+          <div className="hover-lift" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 20, padding: '32px', display: 'flex', gap: 24, alignItems: 'flex-start' }}>
+            <div style={{ background: '#8B5CF6', borderRadius: 16, width: 64, height: 64, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 32, flexShrink: 0 }}>
+              📋
+            </div>
+            <div>
+              <h3 style={{ fontSize: 20, fontWeight: 700, color: '#F5E6C8', marginBottom: 4 }}>Cardápio Digital & Gestão</h3>
+              <a href="https://cardapio.foodpronto.com.br" target="_blank" rel="noopener noreferrer" style={{ fontSize: 13, color: '#8B5CF6', textDecoration: 'none', display: 'inline-block', marginBottom: 12 }}>cardapio.foodpronto.com.br</a>
+              <p style={{ fontSize: 15, color: 'rgba(255,255,255,0.5)', lineHeight: 1.65 }}>
+                Menu digital com QR Code, NFC e link direto + gestão completa de mesas, comandas, cozinha (KDS) e relatórios de vendas.
+              </p>
+            </div>
+          </div>
         </div>
 
       </main>
